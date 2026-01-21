@@ -1,0 +1,18 @@
+# AI
+.agent/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Editors
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+
