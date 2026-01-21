@@ -1,27 +1,25 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import type { ThemeMode } from '@styles/colors';
+import { getTheme } from '@styles/theme';
+import { Toast } from '@components/common';
 
-/** Notification type */
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 
-/** Notification state */
 export interface Notification {
   message: string;
   type: NotificationType;
 }
 
-/** App context state and actions */
 export interface AppContextType {
   themeMode: ThemeMode;
   toggleTheme: () => void;
   setThemeMode: (mode: ThemeMode) => void;
-  notification: Notification | null;
   showNotification: (message: string, type: NotificationType) => void;
-  hideNotification: () => void;
 }
 
-/** App provider props */
 export interface AppProviderProps {
   children: ReactNode;
 }
@@ -30,7 +28,6 @@ const THEME_STORAGE_KEY = 'day-tracker-theme';
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-/** Get initial theme from localStorage or system preference */
 function getInitialTheme(): ThemeMode {
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
@@ -44,10 +41,12 @@ function getInitialTheme(): ThemeMode {
   return 'light';
 }
 
-/** App context provider */
+/** App context provider - handles theme and notifications */
 export function AppProvider({ children }: AppProviderProps) {
   const [themeMode, setThemeModeState] = useState<ThemeMode>(getInitialTheme);
   const [notification, setNotification] = useState<Notification | null>(null);
+
+  const theme = useMemo(() => getTheme(themeMode), [themeMode]);
 
   useEffect(() => {
     localStorage.setItem(THEME_STORAGE_KEY, themeMode);
@@ -76,7 +75,6 @@ export function AppProvider({ children }: AppProviderProps) {
 
   const showNotification = (message: string, type: NotificationType): void => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000);
   };
 
   const hideNotification = (): void => {
@@ -87,12 +85,24 @@ export function AppProvider({ children }: AppProviderProps) {
     themeMode,
     toggleTheme,
     setThemeMode,
-    notification,
     showNotification,
-    hideNotification,
   };
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {children}
+        <Toast
+          open={!!notification}
+          message={notification?.message || ''}
+          variant={notification?.type}
+          onClose={hideNotification}
+          transition="slide"
+        />
+      </ThemeProvider>
+    </AppContext.Provider>
+  );
 }
 
 /** Hook to access app context */

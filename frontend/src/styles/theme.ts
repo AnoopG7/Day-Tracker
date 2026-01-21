@@ -305,19 +305,41 @@ function getComponentOverrides(
     MuiAlert: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: 12,
+          fontWeight: 500,
+          border: '1px solid',
         },
         standardSuccess: {
-          backgroundColor: isDark ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.1)',
+          backgroundColor: isDark ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.15)',
+          borderColor: isDark ? 'rgba(34, 197, 94, 0.4)' : 'rgba(34, 197, 94, 0.3)',
+          color: isDark ? '#4ade80' : '#15803d',
+          '& .MuiAlert-icon': {
+            color: isDark ? '#4ade80' : '#22c55e',
+          },
         },
         standardError: {
-          backgroundColor: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)',
+          backgroundColor: isDark ? 'rgba(239, 68, 68, 0.25)' : 'rgba(239, 68, 68, 0.15)',
+          borderColor: isDark ? 'rgba(239, 68, 68, 0.4)' : 'rgba(239, 68, 68, 0.3)',
+          color: isDark ? '#f87171' : '#b91c1c',
+          '& .MuiAlert-icon': {
+            color: isDark ? '#f87171' : '#ef4444',
+          },
         },
         standardWarning: {
-          backgroundColor: isDark ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.1)',
+          backgroundColor: isDark ? 'rgba(251, 191, 36, 0.25)' : 'rgba(251, 191, 36, 0.15)',
+          borderColor: isDark ? 'rgba(251, 191, 36, 0.4)' : 'rgba(251, 191, 36, 0.3)',
+          color: isDark ? '#fbbf24' : '#b45309',
+          '& .MuiAlert-icon': {
+            color: isDark ? '#fbbf24' : '#f59e0b',
+          },
         },
         standardInfo: {
-          backgroundColor: isDark ? 'rgba(14, 165, 233, 0.15)' : 'rgba(14, 165, 233, 0.1)',
+          backgroundColor: isDark ? 'rgba(56, 189, 248, 0.25)' : 'rgba(56, 189, 248, 0.15)',
+          borderColor: isDark ? 'rgba(56, 189, 248, 0.4)' : 'rgba(56, 189, 248, 0.3)',
+          color: isDark ? '#38bdf8' : '#0369a1',
+          '& .MuiAlert-icon': {
+            color: isDark ? '#38bdf8' : '#0ea5e9',
+          },
         },
       },
     },
