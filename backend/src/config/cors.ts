@@ -1,5 +1,6 @@
 import cors, { CorsOptions } from 'cors';
-import { env } from './env.js';
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Define allowed origins based on environment
 const allowedOrigins: Record<string, string[]> = {
@@ -13,7 +14,7 @@ const allowedOrigins: Record<string, string[]> = {
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    const origins = allowedOrigins[env.NODE_ENV] || allowedOrigins.development;
+    const origins = allowedOrigins[NODE_ENV] || allowedOrigins.development;
 
     // Allow requests with no origin (direct browser access, mobile apps, Postman, etc.)
     if (!origin) {
@@ -22,18 +23,18 @@ const corsOptions: CorsOptions = {
     }
 
     // Allow if origin is in the list, or if in development mode allow all
-    if (origins.includes(origin) || env.NODE_ENV === 'development') {
+    if (origins.includes(origin) || NODE_ENV === 'development') {
       callback(null, true);
     } else {
       console.warn(`CORS blocked origin: ${origin}`);
       callback(null, false);
     }
   },
-  credentials: true, // Allow cookies and auth headers
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['X-Total-Count'], // Headers to expose to the client
-  maxAge: 86400, // Cache preflight for 24 hours
+  exposedHeaders: ['X-Total-Count'],
+  maxAge: 86400,
 };
 
 export const corsMiddleware = cors(corsOptions);

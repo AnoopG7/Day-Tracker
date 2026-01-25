@@ -1,11 +1,15 @@
+import dotenv from 'dotenv';
 import express, { Express } from 'express';
-import { env } from './config/env.js';
-import { connectDB } from './config/db.js';
+import connectDB from './config/db.js';
 import { corsMiddleware } from './config/cors.js';
 import routes from './routes/index.js';
-import { errorMiddleware } from './middlewares/error.middleware.js';
+import { errorHandler, notFound } from './middlewares/error.middleware.js';
+
+dotenv.config();
 
 const app: Express = express();
+const PORT = process.env.PORT || 5001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Middleware
 app.use(corsMiddleware);
@@ -24,23 +28,24 @@ app.get('/', (req, res) => {
   });
 });
 
+// 404 handler for unmatched routes
+app.use(notFound);
+
 // Error handling middleware (must be last)
-app.use(errorMiddleware);
+app.use(errorHandler);
 
 // Start server
 const startServer = async (): Promise<void> => {
   try {
-    // Connect to MongoDB
     await connectDB();
 
-    // Start Express server
-    app.listen(env.PORT, () => {
+    app.listen(PORT, () => {
       console.log('\n🚀 Day-Tracker Backend Server');
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log(`➜  Local:   http://localhost:${env.PORT}`);
-      console.log(`➜  API:     http://localhost:${env.PORT}/api`);
-      console.log(`➜  Health:  http://localhost:${env.PORT}/api/health`);
-      console.log(`📍 Environment: ${env.NODE_ENV}`);
+      console.log(`➜  Local:   http://localhost:${PORT}`);
+      console.log(`➜  API:     http://localhost:${PORT}/api`);
+      console.log(`➜  Health:  http://localhost:${PORT}/api/health`);
+      console.log(`📍 Environment: ${NODE_ENV}`);
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     });
   } catch (error) {
@@ -50,4 +55,3 @@ const startServer = async (): Promise<void> => {
 };
 
 startServer();
-
