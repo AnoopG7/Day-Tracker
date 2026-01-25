@@ -11,6 +11,7 @@ import {
   getUsers,
 } from '../controllers/auth.controller.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
+import { authRateLimiter, passwordResetRateLimiter } from '../middlewares/security.middleware.js';
 import { validate } from '../middlewares/validation.middleware.js';
 import {
   registerSchema,
@@ -24,11 +25,11 @@ import {
 
 const router = Router();
 
-// Public routes
-router.post('/register', validate(registerSchema), register);
-router.post('/login', validate(loginSchema), login);
-router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
-router.post('/reset-password', validate(resetPasswordSchema), resetPassword);
+// Public routes with stricter rate limiting
+router.post('/register', authRateLimiter, validate(registerSchema), register);
+router.post('/login', authRateLimiter, validate(loginSchema), login);
+router.post('/forgot-password', passwordResetRateLimiter, validate(forgotPasswordSchema), forgotPassword);
+router.post('/reset-password', passwordResetRateLimiter, validate(resetPasswordSchema), resetPassword);
 
 // Protected routes
 router.get('/me', authenticate, getMe);

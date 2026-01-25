@@ -4,6 +4,8 @@ import connectDB from './config/db.js';
 import { corsMiddleware } from './config/cors.js';
 import routes from './routes/index.js';
 import { errorHandler, notFound } from './middlewares/error.middleware.js';
+import { securityHeaders, globalRateLimiter } from './middlewares/security.middleware.js';
+import { requestLogger } from './middlewares/logger.middleware.js';
 
 dotenv.config();
 
@@ -11,10 +13,17 @@ const app: Express = express();
 const PORT = process.env.PORT || 5001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Middleware
+// Security middleware
+app.use(securityHeaders);
+app.use(globalRateLimiter);
+
+// Request logging
+app.use(requestLogger);
+
+// Core middleware
 app.use(corsMiddleware);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // API Routes
 app.use('/api', routes);
@@ -46,6 +55,7 @@ const startServer = async (): Promise<void> => {
       console.log(`➜  API:     http://localhost:${PORT}/api`);
       console.log(`➜  Health:  http://localhost:${PORT}/api/health`);
       console.log(`📍 Environment: ${NODE_ENV}`);
+      console.log('🔒 Security: Headers + Rate Limiting enabled');
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     });
   } catch (error) {
