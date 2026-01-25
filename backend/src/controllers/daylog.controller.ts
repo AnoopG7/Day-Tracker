@@ -204,13 +204,17 @@ export const getWeeklySummary = asyncHandler(async (req: AuthRequest, res: Respo
 });
 
 /**
- * @desc    Get current streak (consecutive days logged)
+ * @desc    Get current streak (consecutive days with sleep OR exercise logged)
  * @route   GET /api/daylogs/streak
+ * 
+ * Streak Rule: A day counts if it has:
+ * - sleep data (duration OR start/end times), OR
+ * - exercise data (duration OR start/end times)
  */
 export const getStreak = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
   
-  // Get last 365 days of logs
+  // Get last 365 days of logs with sleep/exercise data
   const today = new Date();
   const yearAgo = new Date(today);
   yearAgo.setDate(yearAgo.getDate() - 365);
@@ -218,14 +222,30 @@ export const getStreak = asyncHandler(async (req: AuthRequest, res: Response) =>
   const daylogs = await DayLog.find({
     userId,
     date: { $gte: yearAgo.toISOString().split('T')[0] },
-  }).select('date').sort({ date: -1 });
+  }).select('date sleep exercise').sort({ date: -1 });
 
-  if (daylogs.length === 0) {
-    successResponse(res, { currentStreak: 0, longestStreak: 0, totalDaysLogged: 0 }, 'Streak info fetched');
+  // Helper to check if activity data exists
+  const hasActivityData = (activity: { duration?: number; startTime?: string; endTime?: string } | undefined): boolean => {
+    if (!activity) return false;
+    return !!(activity.duration || (activity.startTime && activity.endTime));
+  };
+
+  // Filter to only days with actual data logged
+  const completedDays = daylogs.filter(d => 
+    hasActivityData(d.sleep) || hasActivityData(d.exercise)
+  );
+
+  if (completedDays.length === 0) {
+    successResponse(res, { 
+      currentStreak: 0, 
+      longestStreak: 0, 
+      totalDaysLogged: 0,
+      streakRule: 'Day counts if sleep OR exercise is logged',
+    }, 'Streak info fetched');
     return;
   }
 
-  const loggedDates = new Set(daylogs.map(d => d.date));
+  const loggedDates = new Set(completedDays.map(d => d.date));
   let currentStreak = 0;
   let longestStreak = 0;
   let tempStreak = 0;
@@ -254,6 +274,7 @@ export const getStreak = asyncHandler(async (req: AuthRequest, res: Response) =>
   successResponse(res, {
     currentStreak,
     longestStreak,
-    totalDaysLogged: daylogs.length,
+    totalDaysLogged: completedDays.length,
+    streakRule: 'Day counts if sleep OR exercise is logged',
   }, 'Streak info fetched');
 });
