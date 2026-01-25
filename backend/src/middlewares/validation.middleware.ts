@@ -6,13 +6,13 @@ type ValidationTarget = 'body' | 'params' | 'query';
 
 export const validate = (
   schema: ZodSchema,
-  target: ValidationTarget = 'body'
+target: ValidationTarget = 'body'
 ) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const data = req[target];
       const parsed = schema.parse(data);
-      
+
       // Replace the target with parsed data (for transformed values)
       req[target] = parsed;
       
