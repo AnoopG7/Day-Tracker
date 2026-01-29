@@ -13,7 +13,12 @@ export const registerSchema = z.object({
     .trim(),
   password: z
     .string()
-    .min(6, 'Password must be at least 6 characters'),
+    .min(8, 'Password must be at least 8 characters')
+    .max(100, 'Password cannot exceed 100 characters')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)'
+    ),
   phone: z
     .string()
     .regex(/^[0-9]{10,15}$/, 'Please provide a valid phone number')
@@ -50,7 +55,14 @@ export const updateProfileSchema = z.object({
 
 export const updatePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z.string().min(6, 'New password must be at least 6 characters'),
+  newPassword: z
+    .string()
+    .min(8, 'New password must be at least 8 characters')
+    .max(100, 'Password cannot exceed 100 characters')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)'
+    ),
 });
 
 export const forgotPasswordSchema = z.object({
@@ -59,7 +71,14 @@ export const forgotPasswordSchema = z.object({
 
 export const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Token is required'),
-  newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+  newPassword: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(100, 'Password cannot exceed 100 characters')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)'
+    ),
 });
 
 export const deleteAccountSchema = z.object({

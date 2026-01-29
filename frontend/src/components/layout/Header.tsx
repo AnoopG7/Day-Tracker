@@ -21,7 +21,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '@context/AppContext';
-import useAppStore from '@stores/useAppStore';
+import { useAuth } from '@hooks/useAuth';
 
 export interface HeaderProps {
   onMenuClick?: () => void;
@@ -32,7 +32,7 @@ export interface HeaderProps {
 export function Header({ onMenuClick, title = 'Day Tracker' }: HeaderProps): ReactElement {
   const navigate = useNavigate();
   const { themeMode, toggleTheme } = useAppContext();
-  const { user, logout } = useAppStore();
+  const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>): void => {
@@ -46,9 +46,6 @@ export function Header({ onMenuClick, title = 'Day Tracker' }: HeaderProps): Rea
   const handleLogout = (): void => {
     handleMenuClose();
     logout();
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    navigate('/login');
   };
 
   const handleProfile = (): void => {

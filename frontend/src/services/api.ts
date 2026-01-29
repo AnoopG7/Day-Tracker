@@ -7,7 +7,7 @@ import axios, {
 import type { ApiResponse, ApiErrorResponse } from '../types/api.types';
 
 /** API base URL from environment or fallback */
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 /** Request timeout in milliseconds */
 const REQUEST_TIMEOUT = 10000;
@@ -49,7 +49,17 @@ function handleResponseError(error: AxiosError<ApiErrorResponse>): Promise<never
   if (error.response?.status === 401) {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
-    window.location.href = '/login';
+    
+    // Only redirect if not already on auth page
+    const currentPath = window.location.pathname;
+    if (
+      !currentPath.startsWith('/login') &&
+      !currentPath.startsWith('/register') &&
+      !currentPath.startsWith('/forgot-password') &&
+      !currentPath.startsWith('/reset-password')
+    ) {
+      window.location.href = '/login';
+    }
   }
   return Promise.reject(error);
 }

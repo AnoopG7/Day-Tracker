@@ -19,6 +19,7 @@ export default defineConfig({
       '@schemas': path.resolve(__dirname, './src/schemas'),
       '@routes': path.resolve(__dirname, './src/routes'),
       '@styles': path.resolve(__dirname, './src/styles'),
+      '@assets': path.resolve(__dirname, './src/assets'),
     },
   },
   server: {

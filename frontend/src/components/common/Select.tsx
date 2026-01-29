@@ -36,11 +36,7 @@ export function Select({
 
   return (
     <FormControl fullWidth={fullWidth} error={error}>
-      {label && (
-        <InputLabel shrink={hasValue || !!placeholder}>
-          {label}
-        </InputLabel>
-      )}
+      {label && <InputLabel shrink={hasValue || !!placeholder}>{label}</InputLabel>}
       <MuiSelect
         label={label}
         value={value}

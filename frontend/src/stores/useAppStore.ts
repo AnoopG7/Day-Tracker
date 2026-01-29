@@ -1,13 +1,6 @@
 import { create, type StateCreator } from 'zustand';
 import { devtools, persist, type PersistOptions } from 'zustand/middleware';
-
-/** User information */
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role?: string;
-}
+import type { User } from '../types/user.types';
 
 /** App store state */
 export interface AppState {

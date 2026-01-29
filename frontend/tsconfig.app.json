@@ -58,6 +58,9 @@
       ],
       "@styles/*": [
         "src/styles/*"
+      ],
+      "@assets/*": [
+        "src/assets/*"
       ]
     },
     /* Linting */

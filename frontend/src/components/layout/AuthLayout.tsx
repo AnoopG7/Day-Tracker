@@ -9,10 +9,11 @@ export interface AuthLayoutProps {
   children: ReactNode;
   title?: string;
   subtitle?: string;
+  icon?: ReactNode;
 }
 
 /** Minimal layout for auth pages (login, register, etc.) */
-export function AuthLayout({ children, title, subtitle }: AuthLayoutProps): ReactElement {
+export function AuthLayout({ children, title, subtitle, icon }: AuthLayoutProps): ReactElement {
   const { themeMode, toggleTheme } = useAppContext();
 
   return (
@@ -49,8 +50,25 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps): Reac
           py: 4,
         }}
       >
-        {(title || subtitle) && (
+        {(title || subtitle || icon) && (
           <Box sx={{ textAlign: 'center', mb: 4 }}>
+            {icon && (
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 56,
+                  height: 56,
+                  borderRadius: '50%',
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
+                  mb: 2,
+                }}
+              >
+                {icon}
+              </Box>
+            )}
             {title && (
               <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
                 {title}
