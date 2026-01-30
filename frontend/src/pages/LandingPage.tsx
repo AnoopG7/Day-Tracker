@@ -263,12 +263,7 @@ export default function LandingPage(): ReactElement {
                   >
                     {feature.icon}
                   </Box>
-                  <Typography
-                    variant="h5"
-                    fontWeight={700}
-                    gutterBottom
-                    sx={{ mb: 2 }}
-                  >
+                  <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 2 }}>
                     {feature.title}
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
@@ -299,11 +294,7 @@ export default function LandingPage(): ReactElement {
             >
               Ready to Get Started?
             </Typography>
-            <Typography
-              variant="h6"
-              color="text.secondary"
-              sx={{ mb: 5, fontWeight: 400 }}
-            >
+            <Typography variant="h6" color="text.secondary" sx={{ mb: 5, fontWeight: 400 }}>
               Join thousands of users tracking their daily progress
             </Typography>
             <Button

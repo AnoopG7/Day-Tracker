@@ -90,11 +90,23 @@ export const updateExpense = asyncHandler(async (req: AuthRequest, res: Response
 });
 
 /**
- * @desc    Delete expense
+ * @desc    Delete expense (single) or all expenses for a date (bulk)
  * @route   DELETE /api/expenses/:id
+ * @route   DELETE /api/expenses/date/:date
  */
 export const deleteExpense = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const expense = await ExpenseEntry.findOneAndDelete({ _id: req.params.id, userId: req.user?.userId });
+  const { id, date } = req.params;
+  const userId = req.user?.userId;
+  
+  // Bulk delete by date
+  if (date) {
+    const result = await ExpenseEntry.deleteMany({ userId, date });
+    successResponse(res, { deletedCount: result.deletedCount }, `Deleted ${result.deletedCount} expenses`);
+    return;
+  }
+  
+  // Single delete by ID
+  const expense = await ExpenseEntry.findOneAndDelete({ _id: id, userId });
   if (!expense) {
     throw new NotFoundError('Expense not found');
   }

@@ -7,6 +7,7 @@ export interface IUser extends Document {
   password: string;
   phone?: string;
   avatar?: string;
+  timezone: string;
   isActive: boolean;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
@@ -46,6 +47,11 @@ const userSchema = new Schema<IUser>(
     avatar: {
       type: String,
       default: null,
+    },
+    timezone: {
+      type: String,
+      default: 'UTC',
+      required: [true, 'Timezone is required'],
     },
     isActive: {
       type: Boolean,

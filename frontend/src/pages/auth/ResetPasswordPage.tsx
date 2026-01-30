@@ -9,29 +9,11 @@ import { Button, Input } from '@components/common';
 import { AuthLayout } from '@components/layout';
 import { useAuth } from '@hooks/useAuth';
 import { resetPasswordSchema, type ResetPasswordFormData } from '@schemas/auth.schema';
-
-/**
- * Calculate password strength (0-100)
- */
-function calculatePasswordStrength(password: string): number {
-  let strength = 0;
-  if (password.length >= 6) strength += 25;
-  if (password.length >= 10) strength += 15;
-  if (/[a-z]/.test(password)) strength += 15;
-  if (/[A-Z]/.test(password)) strength += 15;
-  if (/[0-9]/.test(password)) strength += 15;
-  if (/[^A-Za-z0-9]/.test(password)) strength += 15;
-  return Math.min(100, strength);
-}
-
-/**
- * Get password strength color
- */
-function getPasswordStrengthColor(strength: number): 'error' | 'warning' | 'success' {
-  if (strength < 50) return 'error';
-  if (strength < 75) return 'warning';
-  return 'success';
-}
+import {
+  calculatePasswordStrength,
+  getPasswordStrengthColor,
+  getPasswordStrengthLabel,
+} from '@/utils/password.util';
 
 /** Reset Password page */
 export default function ResetPasswordPage(): ReactElement {
@@ -46,6 +28,7 @@ export default function ResetPasswordPage(): ReactElement {
     formState: { errors, isSubmitting },
   } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
+    mode: 'onTouched',
     defaultValues: {
       password: '',
       confirmPassword: '',
@@ -62,6 +45,7 @@ export default function ResetPasswordPage(): ReactElement {
     try {
       await resetPassword({ token, password: data.password });
     } catch (error) {
+      console.error('Password reset error:', error);
     }
   };
 
@@ -97,8 +81,8 @@ export default function ResetPasswordPage(): ReactElement {
       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
         <Stack spacing={3}>
           <Alert severity="info">
-            Your new password must be at least 6 characters long and contain uppercase, lowercase,
-            and numbers.
+            Your new password must be at least 8 characters long and contain uppercase, lowercase,
+            numbers, and a special character (@$!%*?&).
           </Alert>
 
           {/* Password */}
@@ -128,11 +112,7 @@ export default function ResetPasswordPage(): ReactElement {
                         sx={{ flex: 1, height: 6, borderRadius: 3 }}
                       />
                       <Typography variant="caption" color="text.secondary">
-                        {passwordStrength < 50
-                          ? 'Weak'
-                          : passwordStrength < 75
-                            ? 'Medium'
-                            : 'Strong'}
+                        {getPasswordStrengthLabel(passwordStrength)}
                       </Typography>
                     </Box>
                   </Box>

@@ -28,6 +28,7 @@ router.get('/', getExpenses);
 router.get('/:id', validate(idParamSchema, 'params'), getExpenseById);
 router.post('/', validate(createExpenseSchema), createExpense);
 router.put('/:id', validate(idParamSchema, 'params'), validate(updateExpenseSchema), updateExpense);
+router.delete('/date/:date', deleteExpense); // Bulk delete by date
 router.delete('/:id', validate(idParamSchema, 'params'), deleteExpense);
 
 export default router;

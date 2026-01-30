@@ -30,27 +30,38 @@ export function StatCard({
   return (
     <Box
       sx={{
-        p: 3,
+        p: { xs: 1.5, sm: 2, md: 3 },
         borderRadius: 2,
         bgcolor: 'background.paper',
         border: '1px solid',
         borderColor: 'divider',
+        minHeight: { xs: 100, sm: 120, md: 140 },
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: { xs: 1, sm: 1.5, md: 2 } }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          fontWeight={500}
+          sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' } }}
+        >
           {title}
         </Typography>
         {icon && (
           <Box
             sx={{
-              p: 1,
+              p: { xs: 0.5, sm: 0.75, md: 1 },
               borderRadius: 1,
               bgcolor: `${color}.main`,
               color: `${color}.contrastText`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              '& svg': {
+                fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+              },
             }}
           >
             {icon}
@@ -58,7 +69,12 @@ export function StatCard({
         )}
       </Box>
 
-      <Typography variant="h4" fontWeight={700} gutterBottom>
+      <Typography
+        variant="h4"
+        fontWeight={700}
+        gutterBottom
+        sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem', md: '2.125rem' } }}
+      >
         {value}
       </Typography>
 

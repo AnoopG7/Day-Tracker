@@ -1,10 +1,24 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+// Exercise types enum
+export const EXERCISE_TYPES = [
+  'running',
+  'walking',
+  'cycling',
+  'swimming',
+  'gym',
+  'yoga',
+  'sports',
+  'cardio',
+  'other'
+] as const;
+
 // Activity can be tracked with EITHER times OR duration, not both
 interface IActivityEntry {
   startTime?: string; // "HH:mm" format
   endTime?: string; // "HH:mm" format
   duration?: number; // minutes (use if start/end not provided)
+  exerciseType?: string; // Only for exercise activity
 }
 
 export interface IDayLog extends Document {
@@ -25,18 +39,15 @@ export const DEFAULT_ACTIVITIES = ['sleep', 'exercise'] as const;
  * - Empty object is valid (no data entered yet)
  * - Duration alone is valid
  * - Both startTime and endTime together is valid
- * - Partial times or all three is invalid
+ * - Duration with times is valid (duration should match calculated)
+ * - Partial times is invalid
  */
 function validateActivityEntry(entry: IActivityEntry): boolean {
   const hasStart = entry.startTime != null;
   const hasEnd = entry.endTime != null;
-  const hasDuration = entry.duration != null;
 
   // Empty object is ok (no data yet)
-  if (!hasDuration && !hasStart && !hasEnd) return true;
-
-  // Can't have duration AND any times
-  if (hasDuration && (hasStart || hasEnd)) return false;
+  if (!entry.duration && !hasStart && !hasEnd) return true;
 
   // If using times, must have BOTH (not just one)
   if ((hasStart || hasEnd) && hasStart !== hasEnd) return false;
@@ -58,6 +69,10 @@ const activityEntrySchema = new Schema<IActivityEntry>(
     duration: {
       type: Number,
       min: [0, 'Duration cannot be negative'],
+    },
+    exerciseType: {
+      type: String,
+      enum: EXERCISE_TYPES,
     },
   },
   { _id: false }

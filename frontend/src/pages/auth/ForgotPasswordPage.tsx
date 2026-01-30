@@ -2,7 +2,7 @@ import { useState, type ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Typography, Link, Stack, Alert } from '@mui/material';
+import { Box, Typography, Link, Stack, Alert, Button as MuiButton } from '@mui/material';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -23,6 +23,7 @@ export default function ForgotPasswordPage(): ReactElement {
     getValues,
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
+    mode: 'onTouched',
     defaultValues: {
       email: '',
     },
@@ -33,6 +34,7 @@ export default function ForgotPasswordPage(): ReactElement {
       await forgotPassword(data.email);
       setEmailSent(true);
     } catch (error) {
+      console.error('Password reset error:', error);
     }
   };
 
@@ -59,11 +61,15 @@ export default function ForgotPasswordPage(): ReactElement {
             <Button variant="outlined" fullWidth onClick={() => setEmailSent(false)}>
               Try Different Email
             </Button>
-            <Link component={RouterLink} to="/login" style={{ textDecoration: 'none', flex: 1 }}>
-              <Button variant="contained" fullWidth>
-                Back to Login
-              </Button>
-            </Link>
+            <MuiButton
+              component={RouterLink}
+              to="/login"
+              variant="contained"
+              fullWidth
+              sx={{ flex: 1 }}
+            >
+              Back to Login
+            </MuiButton>
           </Stack>
         </Stack>
       </AuthLayout>

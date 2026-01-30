@@ -5,15 +5,17 @@ export interface DayLog {
   userId: string;
   date: string;
   sleep?: {
-    hours: number;
-    quality?: 'poor' | 'fair' | 'good' | 'excellent';
+    duration?: number; // minutes
+    startTime?: string;
+    endTime?: string;
   };
   exercise?: {
-    type: string;
-    duration: number;
-    intensity?: 'low' | 'medium' | 'high';
+    duration?: number; // minutes
+    startTime?: string;
+    endTime?: string;
+    exerciseType?: string;
+    notes?: string;
   };
-  mood?: 'terrible' | 'bad' | 'okay' | 'good' | 'great';
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -23,7 +25,7 @@ export interface CustomActivity {
   _id: string;
   userId: string;
   date: string;
-  activityName: string;
+  name: string;
   duration?: number;
   startTime?: string;
   endTime?: string;
@@ -37,7 +39,7 @@ export interface NutritionEntry {
   userId: string;
   date: string;
   mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
-  foodItem: string;
+  foodName: string;
   calories?: number;
   protein?: number;
   carbs?: number;
@@ -55,7 +57,8 @@ export interface ExpenseEntry {
   description: string;
   amount: number;
   category: string;
-  paymentMethod: 'cash' | 'card' | 'upi' | 'bank-transfer' | 'other';
+  paymentMethod?: 'cash' | 'card' | 'upi' | 'bank-transfer' | 'other';
+  merchant?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -82,6 +85,7 @@ export interface DashboardData {
     items: CustomActivity[];
     count: number;
     totalMinutes: number;
+    uniqueTypes?: number; // Add for frontend display (calculated from items)
   };
   nutrition: {
     entries: NutritionEntry[];
@@ -92,5 +96,9 @@ export interface DashboardData {
     entries: ExpenseEntry[];
     count: number;
     totals: ExpenseTotals;
+  };
+  customActivities?: {
+    templates: string[]; // For Phase 1-3: unique activity names
+    todayLogs: CustomActivity[];
   };
 }

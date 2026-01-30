@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '@context/AppContext';
 import useAppStore from '@stores/useAppStore';
@@ -27,7 +27,14 @@ export interface UseAuthReturn {
 export function useAuth(): UseAuthReturn {
   const navigate = useNavigate();
   const { showNotification } = useAppContext();
-  const { user, isAuthenticated, isLoading, setUser, setLoading, logout: storeLogout } = useAppStore();
+  const {
+    user,
+    isAuthenticated,
+    isLoading,
+    setUser,
+    setLoading,
+    logout: storeLogout,
+  } = useAppStore();
 
   /**
    * Initialize - fetch user if token exists
@@ -66,12 +73,18 @@ export function useAuth(): UseAuthReturn {
       } catch (error: unknown) {
         // Handle Axios errors with specific messages
         if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as { response?: { status: number; data?: { error?: { message?: string }; message?: string } } };
+          const axiosError = error as {
+            response?: {
+              status: number;
+              data?: { error?: { message?: string }; message?: string };
+            };
+          };
           const status = axiosError.response?.status;
-          const serverMessage = axiosError.response?.data?.error?.message || axiosError.response?.data?.message;
+          const serverMessage =
+            axiosError.response?.data?.error?.message || axiosError.response?.data?.message;
 
           let errorMessage = 'Login failed. Please try again.';
-          
+
           if (status === 401) {
             errorMessage = 'Invalid email or password. Please check your credentials.';
           } else if (status === 404) {
@@ -115,18 +128,28 @@ export function useAuth(): UseAuthReturn {
       } catch (error: unknown) {
         // Handle Axios errors with specific messages
         if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as { response?: { status: number; data?: { error?: { message?: string }; message?: string } } };
+          const axiosError = error as {
+            response?: {
+              status: number;
+              data?: { error?: { message?: string }; message?: string };
+            };
+          };
           const status = axiosError.response?.status;
-          const serverMessage = axiosError.response?.data?.error?.message || axiosError.response?.data?.message;
+          const serverMessage =
+            axiosError.response?.data?.error?.message || axiosError.response?.data?.message;
 
           let errorMessage = 'Registration failed. Please try again.';
-          
+
           if (status === 400) {
             // Check if it's a duplicate email error
-            if (serverMessage?.toLowerCase().includes('already exists') || serverMessage?.toLowerCase().includes('duplicate')) {
+            if (
+              serverMessage?.toLowerCase().includes('already exists') ||
+              serverMessage?.toLowerCase().includes('duplicate')
+            ) {
               errorMessage = 'An account with this email already exists. Please sign in instead.';
             } else {
-              errorMessage = serverMessage || 'Invalid registration data. Please check your information.';
+              errorMessage =
+                serverMessage || 'Invalid registration data. Please check your information.';
             }
           } else if (status === 409) {
             errorMessage = 'An account with this email already exists. Please sign in instead.';
@@ -174,12 +197,18 @@ export function useAuth(): UseAuthReturn {
         showNotification('Password reset link sent to your email', 'success');
       } catch (error: unknown) {
         let errorMessage = 'Failed to send reset email. Please try again.';
-        
+
         if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as { response?: { status: number; data?: { error?: { message?: string }; message?: string } } };
+          const axiosError = error as {
+            response?: {
+              status: number;
+              data?: { error?: { message?: string }; message?: string };
+            };
+          };
           const status = axiosError.response?.status;
-          const serverMessage = axiosError.response?.data?.error?.message || axiosError.response?.data?.message;
-          
+          const serverMessage =
+            axiosError.response?.data?.error?.message || axiosError.response?.data?.message;
+
           if (status === 404) {
             errorMessage = 'No account found with this email address.';
           } else if (status && status >= 500) {
@@ -190,7 +219,7 @@ export function useAuth(): UseAuthReturn {
         } else if (error instanceof Error && error.message.includes('Network Error')) {
           errorMessage = 'Network error. Please check your internet connection.';
         }
-        
+
         showNotification(errorMessage, 'error');
         throw error;
       } finally {
@@ -212,12 +241,18 @@ export function useAuth(): UseAuthReturn {
         navigate('/login');
       } catch (error: unknown) {
         let errorMessage = 'Failed to reset password. Please try again.';
-        
+
         if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as { response?: { status: number; data?: { error?: { message?: string }; message?: string } } };
+          const axiosError = error as {
+            response?: {
+              status: number;
+              data?: { error?: { message?: string }; message?: string };
+            };
+          };
           const status = axiosError.response?.status;
-          const serverMessage = axiosError.response?.data?.error?.message || axiosError.response?.data?.message;
-          
+          const serverMessage =
+            axiosError.response?.data?.error?.message || axiosError.response?.data?.message;
+
           if (status === 400) {
             errorMessage = 'Invalid or expired reset link. Please request a new one.';
           } else if (status && status >= 500) {
@@ -228,7 +263,7 @@ export function useAuth(): UseAuthReturn {
         } else if (error instanceof Error && error.message.includes('Network Error')) {
           errorMessage = 'Network error. Please check your internet connection.';
         }
-        
+
         showNotification(errorMessage, 'error');
         throw error;
       } finally {

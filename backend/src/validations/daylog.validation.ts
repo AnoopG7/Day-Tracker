@@ -3,27 +3,26 @@ import { z } from 'zod';
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
+const exerciseTypes = ['running', 'walking', 'cycling', 'swimming', 'gym', 'yoga', 'sports', 'cardio', 'other'] as const;
+
 // Activity entry schema for sleep/exercise
 const activityEntrySchema = z.object({
   startTime: z.string().regex(timeRegex, 'Time must be in HH:mm format').optional(),
   endTime: z.string().regex(timeRegex, 'Time must be in HH:mm format').optional(),
   duration: z.number().min(0, 'Duration cannot be negative').optional(),
+  exerciseType: z.enum(exerciseTypes).optional(),
 }).refine(
   (data) => {
     const hasStart = data.startTime != null;
     const hasEnd = data.endTime != null;
-    const hasDuration = data.duration != null;
 
-    // All empty is fine (optional activity)
-    if (!hasStart && !hasEnd && !hasDuration) return true;
-    // Duration alone is fine
-    if (hasDuration && !hasStart && !hasEnd) return true;
-    // Both times without duration is fine
-    if (hasStart && hasEnd && !hasDuration) return true;
-    // All other combos are invalid
-    return false;
+    // If times are provided, both start and end must be present
+    if (hasStart || hasEnd) {
+      return hasStart && hasEnd;
+    }
+    return true;
   },
-  { message: 'Provide either duration OR both start/end times (not both)' }
+  { message: 'Both start and end times must be provided together' }
 );
 
 export const createDayLogSchema = z.object({

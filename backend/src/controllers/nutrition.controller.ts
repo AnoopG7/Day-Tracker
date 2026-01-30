@@ -86,11 +86,23 @@ export const updateNutrition = asyncHandler(async (req: AuthRequest, res: Respon
 });
 
 /**
- * @desc    Delete nutrition entry
+ * @desc    Delete nutrition entry (single) or all entries for a date (bulk)
  * @route   DELETE /api/nutrition/:id
+ * @route   DELETE /api/nutrition/date/:date
  */
 export const deleteNutrition = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const entry = await NutritionEntry.findOneAndDelete({ _id: req.params.id, userId: req.user?.userId });
+  const { id, date } = req.params;
+  const userId = req.user?.userId;
+  
+  // Bulk delete by date
+  if (date) {
+    const result = await NutritionEntry.deleteMany({ userId, date });
+    successResponse(res, { deletedCount: result.deletedCount }, `Deleted ${result.deletedCount} nutrition entries`);
+    return;
+  }
+  
+  // Single delete by ID
+  const entry = await NutritionEntry.findOneAndDelete({ _id: id, userId });
   if (!entry) {
     throw new NotFoundError('Nutrition entry not found');
   }

@@ -27,21 +27,27 @@ export function useDashboard(initialDate?: string): UseDashboardReturn {
         setError(null);
         const dashboardData = await dashboardService.getDashboard(date);
         setData(dashboardData);
-      } catch (err: unknown) {
+      } catch {
         const errorMessage = 'Failed to load dashboard data';
         setError(errorMessage);
-        showNotification(errorMessage, 'error');
       } finally {
         setIsLoading(false);
       }
     },
-    [showNotification]
+    [] // No dependencies - function is stable
   );
 
   // Initial fetch
   useEffect(() => {
     fetchDashboard(initialDate);
   }, [initialDate, fetchDashboard]);
+
+  // Separate effect for error notifications
+  useEffect(() => {
+    if (error) {
+      showNotification(error, 'error');
+    }
+  }, [error, showNotification]);
 
   return {
     data,

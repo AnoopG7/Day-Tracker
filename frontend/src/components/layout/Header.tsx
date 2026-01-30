@@ -11,6 +11,8 @@ import {
   Tooltip,
   Divider,
   ListItemIcon,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -31,6 +33,8 @@ export interface HeaderProps {
 /** Main application header */
 export function Header({ onMenuClick, title = 'Day Tracker' }: HeaderProps): ReactElement {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { themeMode, toggleTheme } = useAppContext();
   const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -68,7 +72,7 @@ export function Header({ onMenuClick, title = 'Day Tracker' }: HeaderProps): Rea
       }}
     >
       <Toolbar>
-        {onMenuClick && (
+        {onMenuClick && isMobile && (
           <IconButton
             edge="start"
             color="inherit"

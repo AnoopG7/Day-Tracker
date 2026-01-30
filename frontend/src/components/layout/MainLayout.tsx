@@ -13,15 +13,18 @@ const SIDEBAR_WIDTH = 240;
 export function MainLayout({ children }: MainLayoutProps): ReactElement {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const handleMenuClick = (): void => {
-    setSidebarOpen((prev) => !prev);
+    // Only toggle on mobile
+    if (isMobile) {
+      setMobileSidebarOpen((prev) => !prev);
+    }
   };
 
   const handleSidebarClose = (): void => {
     if (isMobile) {
-      setSidebarOpen(false);
+      setMobileSidebarOpen(false);
     }
   };
 
@@ -30,9 +33,9 @@ export function MainLayout({ children }: MainLayoutProps): ReactElement {
       <Header onMenuClick={handleMenuClick} />
 
       <Sidebar
-        open={sidebarOpen}
+        open={isMobile ? mobileSidebarOpen : true}
         onClose={handleSidebarClose}
-        variant={isMobile ? 'temporary' : 'persistent'}
+        variant={isMobile ? 'temporary' : 'permanent'}
         width={SIDEBAR_WIDTH}
       />
 
@@ -42,11 +45,7 @@ export function MainLayout({ children }: MainLayoutProps): ReactElement {
           flexGrow: 1,
           bgcolor: 'background.default',
           minHeight: '100vh',
-          transition: theme.transitions.create(['margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-          marginLeft: isMobile ? 0 : sidebarOpen ? 0 : `-${SIDEBAR_WIDTH}px`,
+          marginLeft: 0, // Sidebar is always visible on desktop via permanent variant
         }}
       >
         <Toolbar />

@@ -1,8 +1,9 @@
 import { Response } from 'express';
-import { DayLog } from '../models/index.js';
+import { DayLog, User } from '../models/index.js';
 import { successResponse } from '../utils/apiResponse.util.js';
 import { NotFoundError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.util.js';
+import { getTodayInTimezone, getDateInTimezone } from '../utils/timezone.util.js';
 import type { AuthRequest } from '../types/index.js';
 import type { CreateDayLogInput, UpdateDayLogInput } from '../validations/daylog.validation.js';
 
@@ -49,7 +50,11 @@ export const getDayLogs = asyncHandler(async (req: AuthRequest, res: Response) =
  */
 export const getTodayDayLog = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  
+  // Get user's timezone
+  const user = await User.findById(userId).select('timezone');
+  const timezone = user?.timezone || 'UTC';
+  const today = getTodayInTimezone(timezone);
 
   let daylog = await DayLog.findOne({ userId, date: today });
   
@@ -214,14 +219,16 @@ export const getWeeklySummary = asyncHandler(async (req: AuthRequest, res: Respo
 export const getStreak = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
   
+  // Get user's timezone
+  const user = await User.findById(userId).select('timezone');
+  const timezone = user?.timezone || 'UTC';
+  
   // Get last 365 days of logs with sleep/exercise data
-  const today = new Date();
-  const yearAgo = new Date(today);
-  yearAgo.setDate(yearAgo.getDate() - 365);
+  const yearAgoDate = getDateInTimezone(timezone, -365);
 
   const daylogs = await DayLog.find({
     userId,
-    date: { $gte: yearAgo.toISOString().split('T')[0] },
+    date: { $gte: yearAgoDate },
   }).select('date sleep exercise').sort({ date: -1 });
 
   // Helper to check if activity data exists
@@ -250,12 +257,16 @@ export const getStreak = asyncHandler(async (req: AuthRequest, res: Response) =>
   let longestStreak = 0;
   let tempStreak = 0;
   
-  // Check from today backwards
-  const checkDate = new Date(today);
+  // Check from today backwards (using user's timezone)
+  const todayStr = getTodayInTimezone(timezone);
+  const checkDate = new Date(todayStr + 'T00:00:00');
   let isCurrentStreak = true;
 
   for (let i = 0; i < 365; i++) {
-    const dateStr = checkDate.toISOString().split('T')[0];
+    const year = checkDate.getFullYear();
+    const month = String(checkDate.getMonth() + 1).padStart(2, '0');
+    const day = String(checkDate.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
     
     if (loggedDates.has(dateStr)) {
       tempStreak++;

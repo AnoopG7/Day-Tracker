@@ -70,6 +70,7 @@ export const getDashboard = asyncHandler(async (req: AuthRequest, res: Response)
     expenseTotals.byCategory[entry.category].amount += entry.amount;
   }
 
+
   // Calculate activity totals
   let totalActivityMinutes = 0;
   for (const activity of activities) {
@@ -77,11 +78,14 @@ export const getDashboard = asyncHandler(async (req: AuthRequest, res: Response)
       totalActivityMinutes += activity.duration;
     } else if (activity.startTime && activity.endTime) {
       const [startH, startM] = activity.startTime.split(':').map(Number);
-      const [endH, endM] = activity.endTime.split(':').map(Number);
+      const [endH,endM] = activity.endTime.split(':').map(Number);
       const duration = (endH * 60 + endM) - (startH * 60 + startM);
       totalActivityMinutes += Math.max(0, duration);
     }
   }
+
+  // Get unique custom activity template names (all activities user has ever created)
+  const customActivityTemplates = await CustomActivity.distinct('name', { userId });
 
   successResponse(res, {
     date: targetDate,
@@ -100,6 +104,10 @@ export const getDashboard = asyncHandler(async (req: AuthRequest, res: Response)
       entries: expenseEntries,
       count: expenseEntries.length,
       totals: expenseTotals,
+    },
+    customActivities: {
+      templates: customActivityTemplates, // Array of unique activity names
+      todayLogs: activities, // Today's custom activity instances
     },
   }, 'Dashboard data fetched');
 });

@@ -49,7 +49,7 @@ function handleResponseError(error: AxiosError<ApiErrorResponse>): Promise<never
   if (error.response?.status === 401) {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
-    
+
     // Only redirect if not already on auth page
     const currentPath = window.location.pathname;
     if (

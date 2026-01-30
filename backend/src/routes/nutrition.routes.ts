@@ -26,6 +26,7 @@ router.get('/', getNutritionEntries);
 router.get('/:id', validate(idParamSchema, 'params'), getNutritionById);
 router.post('/', validate(createNutritionSchema), createNutrition);
 router.put('/:id', validate(idParamSchema, 'params'), validate(updateNutritionSchema), updateNutrition);
+router.delete('/date/:date', deleteNutrition); // Bulk delete by date
 router.delete('/:id', validate(idParamSchema, 'params'), deleteNutrition);
 
 export default router;

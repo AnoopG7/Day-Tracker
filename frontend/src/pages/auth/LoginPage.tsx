@@ -20,6 +20,7 @@ export default function LoginPage(): ReactElement {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onTouched',
     defaultValues: {
       email: '',
       password: '',
@@ -36,6 +37,7 @@ export default function LoginPage(): ReactElement {
     try {
       await login({ email: data.email, password: data.password });
     } catch (error) {
+      console.error('Login error:', error);
     }
   };
 

@@ -17,29 +17,11 @@ import { Button, Input } from '@components/common';
 import { AuthLayout } from '@components/layout';
 import { useAuth } from '@hooks/useAuth';
 import { registerSchema, type RegisterFormData } from '@schemas/auth.schema';
-
-/**
- * Calculate password strength (0-100)
- */
-function calculatePasswordStrength(password: string): number {
-  let strength = 0;
-  if (password.length >= 6) strength += 25;
-  if (password.length >= 10) strength += 15;
-  if (/[a-z]/.test(password)) strength += 15;
-  if (/[A-Z]/.test(password)) strength += 15;
-  if (/[0-9]/.test(password)) strength += 15;
-  if (/[^A-Za-z0-9]/.test(password)) strength += 15;
-  return Math.min(100, strength);
-}
-
-/**
- * Get password strength color
- */
-function getPasswordStrengthColor(strength: number): 'error' | 'warning' | 'success' {
-  if (strength < 50) return 'error';
-  if (strength < 75) return 'warning';
-  return 'success';
-}
+import {
+  calculatePasswordStrength,
+  getPasswordStrengthColor,
+  getPasswordStrengthLabel,
+} from '@/utils/password.util';
 
 /** Register page */
 export default function RegisterPage(): ReactElement {
@@ -52,6 +34,7 @@ export default function RegisterPage(): ReactElement {
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onTouched',
     defaultValues: {
       name: '',
       email: '',
@@ -71,12 +54,17 @@ export default function RegisterPage(): ReactElement {
 
   const onSubmit = async (data: RegisterFormData): Promise<void> => {
     try {
+      // Get user's timezone
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       await register({
         name: data.name,
         email: data.email,
         password: data.password,
+        timezone,
       });
-    } catch (error) {
+    } catch {
+      // Error handling is done in useAuth hook
     }
   };
 
@@ -150,11 +138,7 @@ export default function RegisterPage(): ReactElement {
                         sx={{ flex: 1, height: 6, borderRadius: 3 }}
                       />
                       <Typography variant="caption" color="text.secondary">
-                        {passwordStrength < 50
-                          ? 'Weak'
-                          : passwordStrength < 75
-                            ? 'Medium'
-                            : 'Strong'}
+                        {getPasswordStrengthLabel(passwordStrength)}
                       </Typography>
                     </Box>
                   </Box>

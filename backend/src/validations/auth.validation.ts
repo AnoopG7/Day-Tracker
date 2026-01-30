@@ -23,6 +23,10 @@ export const registerSchema = z.object({
     .string()
     .regex(/^[0-9]{10,15}$/, 'Please provide a valid phone number')
     .optional(),
+  timezone: z
+    .string()
+    .min(1, 'Timezone is required')
+    .default('UTC'),
 });
 
 export const loginSchema = z.object({
