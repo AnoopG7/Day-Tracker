@@ -4,9 +4,3 @@ export { MealTable, type MealRow } from './MealTable';
 export { MealsSection } from './MealsSection';
 export { ExpenseTable, type ExpenseRow } from './ExpenseTable';
 export { CustomActivityForm } from './CustomActivityForm';
-export {
-  SleepExerciseTrendChart,
-  NutritionTrendChart,
-  ExpenseTrendChart,
-  ComparisonCard,
-} from './TrendCharts';
