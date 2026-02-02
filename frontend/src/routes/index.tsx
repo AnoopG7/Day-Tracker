@@ -1,11 +1,13 @@
 import { lazy, Suspense, type ReactElement } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import { ProtectedRoute } from '@components/layout';
 
 // Lazy load pages for code splitting
 const LandingPage = lazy(() => import('@pages/LandingPage'));
 const DashboardPage = lazy(() => import('@pages/DashboardPage'));
+const AnalyticsPage = lazy(() => import('@pages/AnalyticsPage'));
+const ActivitiesPage = lazy(() => import('@pages/ActivitiesPage'));
 const HomePage = lazy(() => import('@pages/HomePage'));
 const AboutPage = lazy(() => import('@pages/AboutPage'));
 const ComponentShowcase = lazy(() => import('@pages/ComponentShowcase'));
@@ -60,6 +62,14 @@ export default function AppRoutes(): ReactElement {
           }
         />
         <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <AnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/components"
           element={
             <ProtectedRoute>
@@ -67,8 +77,14 @@ export default function AppRoutes(): ReactElement {
             </ProtectedRoute>
           }
         />
-
-        {/* Public routes */}
+        <Route
+          path="/activities"
+          element={
+            <ProtectedRoute>
+              <ActivitiesPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/home" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
 

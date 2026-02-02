@@ -32,7 +32,19 @@ export interface IDayLog extends Document {
 }
 
 // Default activity names (used to block in CustomActivity)
-export const DEFAULT_ACTIVITIES = ['sleep', 'exercise'] as const;
+// Reserved activity names (users cannot create custom activities with these names)
+export const DEFAULT_ACTIVITIES = [
+  'sleep',
+  'exercise',
+  'meal',
+  'breakfast',
+  'lunch',
+  'dinner',
+  'snack',
+  'water',
+  'expense',
+  'nutrition',
+] as const;
 
 /**
  * Validates activity entry:

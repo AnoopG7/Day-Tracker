@@ -83,6 +83,42 @@ export const createActivity = asyncHandler(async (req: AuthRequest, res: Respons
 });
 
 /**
+ * @desc    Upsert activity (create or update)
+ * @route   PUT /api/activities/upsert
+ */
+export const upsertActivity = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { date, name, duration, notes, startTime, endTime } = req.body as CreateActivityInput;
+  const userId = req.user?.userId;
+
+  // Build update data
+  const updateData: Partial<CreateActivityInput> = {};
+  if (duration !== undefined) updateData.duration = duration;
+  if (notes !== undefined) updateData.notes = notes;
+  if (startTime !== undefined) updateData.startTime = startTime;
+  if (endTime !== undefined) updateData.endTime = endTime;
+
+  const activity = await CustomActivity.findOneAndUpdate(
+    { userId, date, name },
+    { 
+      $set: { 
+        ...updateData,
+        userId,
+        date,
+        name,
+      } 
+    },
+    { 
+      new: true, 
+      upsert: true, 
+      runValidators: true,
+      setDefaultsOnInsert: true,
+    }
+  );
+
+  successResponse(res, activity, 'Activity saved', 200);
+});
+
+/**
  * @desc    Update activity
  * @route   PUT /api/activities/:id
  */

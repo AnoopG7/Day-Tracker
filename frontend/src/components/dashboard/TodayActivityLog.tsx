@@ -270,13 +270,53 @@ export const TodayActivityLog: FC<TodayActivityLogProps> = ({ selectedDate, data
       if (data?.customActivities?.templates) {
         for (const activityName of data.customActivities.templates) {
           const activityData = customActivities[activityName];
-          if (activityData?.duration) {
-            await api.post('/customactivities', {
+          const existingLog = data.customActivities.todayLogs.find(
+            (log) => log.name === activityName
+          );
+
+          // If no duration or duration is 0, delete the activity if it exists
+          if (
+            !activityData?.duration ||
+            activityData.duration === '0' ||
+            activityData.duration === ''
+          ) {
+            if (existingLog?._id) {
+              try {
+                await api.delete(`/activities/${existingLog._id}`);
+              } catch (error: unknown) {
+                const err = error as {
+                  response?: { data?: { message?: string } };
+                  message?: string;
+                };
+                console.error(
+                  'Failed to delete activity:',
+                  activityName,
+                  err.response?.data || err.message
+                );
+                // Continue even if delete fails (activity might not exist)
+              }
+            }
+            continue; // Skip to next activity
+          }
+
+          // Upsert activity (create or update)
+          try {
+            await api.put('/activities/upsert', {
               date: selectedDate,
               name: activityName,
               duration: Number(activityData.duration),
               ...(activityData.notes && { notes: activityData.notes }),
             });
+          } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } }; message?: string };
+            console.error(
+              'Failed to save custom activity:',
+              activityName,
+              err.response?.data || err.message
+            );
+            throw new Error(
+              `Failed to save activity "${activityName}": ${err.response?.data?.message || err.message}`
+            );
           }
         }
       }
@@ -287,9 +327,10 @@ export const TodayActivityLog: FC<TodayActivityLogProps> = ({ selectedDate, data
       setSnackbar({ open: true, message: 'Changes saved successfully! ✓', severity: 'success' });
     } catch (err) {
       console.error('Failed to save activities:', err);
+      const error = err as { message?: string };
       setSnackbar({
         open: true,
-        message: 'Failed to save changes. Please try again.',
+        message: error.message || 'Failed to save changes. Please try again.',
         severity: 'error',
       });
     } finally {

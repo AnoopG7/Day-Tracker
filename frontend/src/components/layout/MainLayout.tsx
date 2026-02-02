@@ -29,7 +29,7 @@ export function MainLayout({ children }: MainLayoutProps): ReactElement {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
       <Header onMenuClick={handleMenuClick} />
 
       <Sidebar
@@ -45,7 +45,10 @@ export function MainLayout({ children }: MainLayoutProps): ReactElement {
           flexGrow: 1,
           bgcolor: 'background.default',
           minHeight: '100vh',
-          marginLeft: 0, // Sidebar is always visible on desktop via permanent variant
+          marginLeft: 0,
+          width: '100%',
+          maxWidth: '100vw',
+          overflowX: 'hidden',
         }}
       >
         <Toolbar />

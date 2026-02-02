@@ -31,13 +31,25 @@ const customActivitySchema = new Schema<ICustomActivity>(
       trim: true,
       lowercase: true,
       maxlength: [50, 'Activity name cannot exceed 50 characters'],
-      validate: {
-        validator: function (value: string) {
-          const normalized = value.trim().toLowerCase();
-          return !DEFAULT_ACTIVITIES.includes(normalized as typeof DEFAULT_ACTIVITIES[number]);
+      validate: [
+        {
+          validator: function (value: string) {
+            const normalized = value.trim().toLowerCase();
+            return !DEFAULT_ACTIVITIES.includes(
+              normalized as typeof DEFAULT_ACTIVITIES[number]
+            );
+          },
+          message: `Activity name cannot be one of the defaults: ${DEFAULT_ACTIVITIES.join(', ')}`,
         },
-        message: `Activity name cannot be one of the defaults: ${DEFAULT_ACTIVITIES.join(', ')}`,
-      },
+        {
+          validator: function (value: string) {
+            // Only allow letters, numbers, spaces, hyphens, and apostrophes
+            return /^[a-zA-Z0-9 '-]+$/.test(value);
+          },
+          message:
+            'Activity name can only contain letters, numbers, spaces, hyphens, and apostrophes',
+        },
+      ],
     },
     startTime: {
       type: String,

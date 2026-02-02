@@ -4,6 +4,7 @@ import {
   getActivityById,
   getActivitiesByDate,
   createActivity,
+  upsertActivity,
   updateActivity,
   deleteActivity,
   getActivityStats,
@@ -24,6 +25,7 @@ router.get('/date/:date', getActivitiesByDate);
 // CRUD routes
 router.get('/', getActivities);
 router.get('/:id', validate(idParamSchema, 'params'), getActivityById);
+router.put('/upsert', validate(createActivitySchema), upsertActivity); // Upsert route
 router.post('/', validate(createActivitySchema), createActivity);
 router.put('/:id', validate(idParamSchema, 'params'), validate(updateActivitySchema), updateActivity);
 router.delete('/:id', validate(idParamSchema, 'params'), deleteActivity);

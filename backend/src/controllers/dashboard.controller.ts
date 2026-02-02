@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { DayLog, CustomActivity, NutritionEntry, ExpenseEntry } from '../models/index.js';
+import { DayLog, CustomActivity, ActivityTemplate, NutritionEntry, ExpenseEntry } from '../models/index.js';
 import { successResponse } from '../utils/apiResponse.util.js';
 import { asyncHandler } from '../utils/asyncHandler.util.js';
 import type { AuthRequest } from '../types/index.js';
@@ -84,8 +84,11 @@ export const getDashboard = asyncHandler(async (req: AuthRequest, res: Response)
     }
   }
 
-  // Get unique custom activity template names (all activities user has ever created)
-  const customActivityTemplates = await CustomActivity.distinct('name', { userId });
+  // Get active activity templates from ActivityTemplate table
+  const customActivityTemplates = await ActivityTemplate.find({ userId, isActive: true })
+    .select('name')
+    .lean();
+  const templateNames = customActivityTemplates.map(t => t.name);
 
   successResponse(res, {
     date: targetDate,
@@ -106,7 +109,7 @@ export const getDashboard = asyncHandler(async (req: AuthRequest, res: Response)
       totals: expenseTotals,
     },
     customActivities: {
-      templates: customActivityTemplates, // Array of unique activity names
+      templates: templateNames, // Array of active template names from ActivityTemplate
       todayLogs: activities, // Today's custom activity instances
     },
   }, 'Dashboard data fetched');

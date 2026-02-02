@@ -7,6 +7,13 @@ export { DayLog, type IDayLog, DEFAULT_ACTIVITIES } from './daylog.model.js';
 // Custom Activities
 export { CustomActivity, type ICustomActivity } from './customactivity.model.js';
 
+// Activity Templates
+export {
+  ActivityTemplate,
+  type IActivityTemplate,
+  type ActivityCategory,
+} from './activityTemplate.model.js';
+
 // Nutrition
 export {
   NutritionEntry,
