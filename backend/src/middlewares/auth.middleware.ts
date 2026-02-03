@@ -35,7 +35,7 @@ export const authenticate = async (
     req.user = decoded;
 
     next();
-  } catch (error) {
+  } catch {
     res.status(401).json({
       success: false,
       message: 'Invalid or expired token. Please login again.',

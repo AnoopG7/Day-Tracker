@@ -40,7 +40,7 @@ const activityTemplateSchema = new Schema<IActivityTemplate>(
         {
           validator: function (value: string) {
             const normalized = value.trim().toLowerCase();
-            return !DEFAULT_ACTIVITIES.includes(normalized as typeof DEFAULT_ACTIVITIES[number]);
+            return !DEFAULT_ACTIVITIES.includes(normalized as (typeof DEFAULT_ACTIVITIES)[number]);
           },
           message: `Activity name cannot be one of the defaults: ${DEFAULT_ACTIVITIES.join(', ')}`,
         },
@@ -49,7 +49,8 @@ const activityTemplateSchema = new Schema<IActivityTemplate>(
             // Only allow letters, numbers, spaces, hyphens, and apostrophes
             return /^[a-zA-Z0-9 '-]+$/.test(value);
           },
-          message: 'Activity name can only contain letters, numbers, spaces, hyphens, and apostrophes',
+          message:
+            'Activity name can only contain letters, numbers, spaces, hyphens, and apostrophes',
         },
       ],
     },

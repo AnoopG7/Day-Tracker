@@ -23,7 +23,9 @@ interface GroqResponse {
 export async function estimateNutritionFromFood(foodName: string): Promise<NutritionEstimate> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    throw new Error('GROQ_API_KEY environment variable is not set. Please add it to your .env file.');
+    throw new Error(
+      'GROQ_API_KEY environment variable is not set. Please add it to your .env file.'
+    );
   }
 
   const prompt = `Given the food item "${foodName}", estimate the approximate nutritional values for a typical single serving.
@@ -46,10 +48,10 @@ Rules:
 - Indian foods should use typical Indian serving sizes`;
 
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await globalThis.fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -57,7 +59,8 @@ Rules:
         messages: [
           {
             role: 'system',
-            content: 'You are a nutrition expert. Return ONLY valid JSON, no markdown or explanation.',
+            content:
+              'You are a nutrition expert. Return ONLY valid JSON, no markdown or explanation.',
           },
           {
             role: 'user',
@@ -94,7 +97,9 @@ Rules:
       fats: Math.round((Number(parsed.fats) || 0) * 10) / 10,
       fiber: Math.round((Number(parsed.fiber) || 0) * 10) / 10,
       servingSize: parsed.servingSize || '1 serving',
-      confidence: (['high', 'medium', 'low'].includes(parsed.confidence) ? parsed.confidence : 'medium') as 'high' | 'medium' | 'low',
+      confidence: (['high', 'medium', 'low'].includes(parsed.confidence)
+        ? parsed.confidence
+        : 'medium') as 'high' | 'medium' | 'low',
     };
   } catch (error) {
     console.error('AI nutrition estimation error:', error);

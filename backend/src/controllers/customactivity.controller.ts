@@ -4,7 +4,10 @@ import { successResponse } from '../utils/apiResponse.util.js';
 import { NotFoundError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.util.js';
 import type { AuthRequest } from '../types/index.js';
-import type { CreateActivityInput, UpdateActivityInput } from '../validations/customactivity.validation.js';
+import type {
+  CreateActivityInput,
+  UpdateActivityInput,
+} from '../validations/customactivity.validation.js';
 
 /**
  * @desc    Get custom activities with pagination and date range
@@ -29,20 +32,27 @@ export const getActivities = asyncHandler(async (req: AuthRequest, res: Response
   if (name) filter.name = new RegExp(name as string, 'i');
 
   const [activities, total] = await Promise.all([
-    CustomActivity.find(filter).sort({ date: -1, createdAt: -1 }).skip((pageNum - 1) * limitNum).limit(limitNum),
+    CustomActivity.find(filter)
+      .sort({ date: -1, createdAt: -1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum),
     CustomActivity.countDocuments(filter),
   ]);
 
-  successResponse(res, {
-    activities,
-    pagination: {
-      page: pageNum,
-      limit: limitNum,
-      total,
-      totalPages: Math.ceil(total / limitNum),
-      hasMore: pageNum * limitNum < total,
+  successResponse(
+    res,
+    {
+      activities,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+        hasMore: pageNum * limitNum < total,
+      },
     },
-  }, 'Activities fetched');
+    'Activities fetched'
+  );
 });
 
 /**
@@ -76,7 +86,7 @@ export const getActivityById = asyncHandler(async (req: AuthRequest, res: Respon
  */
 export const createActivity = asyncHandler(async (req: AuthRequest, res: Response) => {
   const activity = await CustomActivity.create({
-    ...req.body as CreateActivityInput,
+    ...(req.body as CreateActivityInput),
     userId: req.user?.userId,
   });
   successResponse(res, activity, 'Activity created', 201);
@@ -99,17 +109,17 @@ export const upsertActivity = asyncHandler(async (req: AuthRequest, res: Respons
 
   const activity = await CustomActivity.findOneAndUpdate(
     { userId, date, name },
-    { 
-      $set: { 
+    {
+      $set: {
         ...updateData,
         userId,
         date,
         name,
-      } 
+      },
     },
-    { 
-      new: true, 
-      upsert: true, 
+    {
+      new: true,
+      upsert: true,
       runValidators: true,
       setDefaultsOnInsert: true,
     }
@@ -139,7 +149,10 @@ export const updateActivity = asyncHandler(async (req: AuthRequest, res: Respons
  * @route   DELETE /api/activities/:id
  */
 export const deleteActivity = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const activity = await CustomActivity.findOneAndDelete({ _id: req.params.id, userId: req.user?.userId });
+  const activity = await CustomActivity.findOneAndDelete({
+    _id: req.params.id,
+    userId: req.user?.userId,
+  });
   if (!activity) {
     throw new NotFoundError('Activity not found');
   }
@@ -170,7 +183,8 @@ export const getActivityStats = asyncHandler(async (req: AuthRequest, res: Respo
   const activities = await CustomActivity.find(filter);
 
   // Aggregate by name
-  const activityStats: Record<string, { count: number; totalMinutes: number; dates: string[] }> = {};
+  const activityStats: Record<string, { count: number; totalMinutes: number; dates: string[] }> =
+    {};
 
   for (const activity of activities) {
     if (!activityStats[activity.name]) {
@@ -185,7 +199,7 @@ export const getActivityStats = asyncHandler(async (req: AuthRequest, res: Respo
     } else if (activity.startTime && activity.endTime) {
       const [startH, startM] = activity.startTime.split(':').map(Number);
       const [endH, endM] = activity.endTime.split(':').map(Number);
-      const duration = (endH * 60 + endM) - (startH * 60 + startM);
+      const duration = endH * 60 + endM - (startH * 60 + startM);
       activityStats[activity.name].totalMinutes += Math.max(0, duration);
     }
   }
@@ -195,9 +209,13 @@ export const getActivityStats = asyncHandler(async (req: AuthRequest, res: Respo
     .map(([name, stats]) => ({ name, ...stats }))
     .sort((a, b) => b.count - a.count);
 
-  successResponse(res, {
-    totalActivities: activities.length,
-    uniqueActivities: sortedStats.length,
-    activities: sortedStats,
-  }, 'Activity stats fetched');
+  successResponse(
+    res,
+    {
+      totalActivities: activities.length,
+      uniqueActivities: sortedStats.length,
+      activities: sortedStats,
+    },
+    'Activity stats fetched'
+  );
 });

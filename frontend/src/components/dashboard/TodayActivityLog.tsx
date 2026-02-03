@@ -47,16 +47,28 @@ export const TodayActivityLog: FC<TodayActivityLogProps> = ({ selectedDate, data
   >({});
 
   // Bundle sleep/exercise data for the save hook
-  const sleepExerciseData = useMemo(() => ({
-    sleepHours,
-    sleepStartTime,
-    sleepEndTime,
-    exerciseDuration,
-    exerciseType,
-    exerciseStartTime,
-    exerciseEndTime,
-    daylogNotes,
-  }), [sleepHours, sleepStartTime, sleepEndTime, exerciseDuration, exerciseType, exerciseStartTime, exerciseEndTime, daylogNotes]);
+  const sleepExerciseData = useMemo(
+    () => ({
+      sleepHours,
+      sleepStartTime,
+      sleepEndTime,
+      exerciseDuration,
+      exerciseType,
+      exerciseStartTime,
+      exerciseEndTime,
+      daylogNotes,
+    }),
+    [
+      sleepHours,
+      sleepStartTime,
+      sleepEndTime,
+      exerciseDuration,
+      exerciseType,
+      exerciseStartTime,
+      exerciseEndTime,
+      daylogNotes,
+    ]
+  );
 
   // Use the save hook for all save logic
   const { submitting, snackbar, setSnackbar, handleSaveAll } = useSaveActivityLog(
@@ -69,47 +81,47 @@ export const TodayActivityLog: FC<TodayActivityLogProps> = ({ selectedDate, data
     onSuccess
   );
 
-  // Initialize custom activities when data loads
+  // Initialize custom activities when data loads (defer setState to avoid sync setState in effect)
   useEffect(() => {
-    if (data?.customActivities) {
-      const initialData: Record<string, { duration: string; notes: string }> = {};
-      data.customActivities.templates.forEach((name) => {
-        const todayLog = data.customActivities!.todayLogs.find((log) => log.name === name);
-        initialData[name] = {
-          duration: todayLog?.duration?.toString() || '',
-          notes: todayLog?.notes || '',
-        };
-      });
-      setCustomActivities(initialData);
-    }
+    if (!data?.customActivities) return;
+    const initialData: Record<string, { duration: string; notes: string }> = {};
+    data.customActivities.templates.forEach((name) => {
+      const todayLog = data.customActivities!.todayLogs.find((log) => log.name === name);
+      initialData[name] = {
+        duration: todayLog?.duration?.toString() || '',
+        notes: todayLog?.notes || '',
+      };
+    });
+    queueMicrotask(() => setCustomActivities(initialData));
   }, [data]);
 
-  // Pre-fill sleep & exercise when data loads
+  // Pre-fill sleep & exercise when data loads (defer setState to avoid sync setState in effect)
   useEffect(() => {
-    if (data?.daylog) {
-      setSleepHours(
-        data.daylog.sleep?.duration ? (data.daylog.sleep.duration / 60).toString() : ''
-      );
-      setSleepStartTime(data.daylog.sleep?.startTime || '');
-      setSleepEndTime(data.daylog.sleep?.endTime || '');
-      setExerciseDuration(data.daylog.exercise?.duration?.toString() || '');
-      setExerciseStartTime(data.daylog.exercise?.startTime || '');
-      setExerciseEndTime(data.daylog.exercise?.endTime || '');
-      setExerciseType(
-        data.daylog.exercise?.exerciseType ? capitalize(data.daylog.exercise.exerciseType) : ''
-      );
-      setDaylogNotes(data.daylog.notes || '');
-    } else {
-      // Reset when no data (new date or cleared data)
-      setSleepHours('');
-      setSleepStartTime('');
-      setSleepEndTime('');
-      setExerciseDuration('');
-      setExerciseStartTime('');
-      setExerciseEndTime('');
-      setExerciseType('');
-      setDaylogNotes('');
-    }
+    queueMicrotask(() => {
+      if (data?.daylog) {
+        setSleepHours(
+          data.daylog.sleep?.duration ? (data.daylog.sleep.duration / 60).toString() : ''
+        );
+        setSleepStartTime(data.daylog.sleep?.startTime || '');
+        setSleepEndTime(data.daylog.sleep?.endTime || '');
+        setExerciseDuration(data.daylog.exercise?.duration?.toString() || '');
+        setExerciseStartTime(data.daylog.exercise?.startTime || '');
+        setExerciseEndTime(data.daylog.exercise?.endTime || '');
+        setExerciseType(
+          data.daylog.exercise?.exerciseType ? capitalize(data.daylog.exercise.exerciseType) : ''
+        );
+        setDaylogNotes(data.daylog.notes || '');
+      } else {
+        setSleepHours('');
+        setSleepStartTime('');
+        setSleepEndTime('');
+        setExerciseDuration('');
+        setExerciseStartTime('');
+        setExerciseEndTime('');
+        setExerciseType('');
+        setDaylogNotes('');
+      }
+    });
   }, [data, selectedDate]);
 
   // Custom activity handler

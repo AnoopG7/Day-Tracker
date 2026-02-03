@@ -23,6 +23,12 @@
     "exclude": [
         "node_modules",
         "dist",
-        "tests"
+        "coverage",
+        "tests",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/*.tsbuildinfo",
+        ".env",
+        "*.config.js"
     ]
 }

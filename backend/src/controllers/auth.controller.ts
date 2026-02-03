@@ -6,7 +6,12 @@ import { successResponse } from '../utils/apiResponse.util.js';
 import { BadRequestError, UnauthorizedError, NotFoundError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.util.js';
 import type { AuthRequest } from '../types/index.js';
-import type { RegisterInput, LoginInput, UpdatePasswordInput, ResetPasswordInput } from '../validations/auth.validation.js';
+import type {
+  RegisterInput,
+  LoginInput,
+  UpdatePasswordInput,
+  ResetPasswordInput,
+} from '../validations/auth.validation.js';
 
 /**
  * @desc    Register new user
@@ -23,10 +28,15 @@ export const register = asyncHandler(async (req: AuthRequest, res: Response) => 
   const user = await User.create({ name, email, password, phone });
   const token = generateToken(user._id.toString(), user.email);
 
-  successResponse(res, {
-    user: { id: user._id, name: user.name, email: user.email },
-    token,
-  }, 'User registered successfully', 201);
+  successResponse(
+    res,
+    {
+      user: { id: user._id, name: user.name, email: user.email },
+      token,
+    },
+    'User registered successfully',
+    201
+  );
 });
 
 /**
@@ -53,10 +63,14 @@ export const login = asyncHandler(async (req: AuthRequest, res: Response) => {
 
   const token = generateToken(user._id.toString(), user.email);
 
-  successResponse(res, {
-    user: { id: user._id, name: user.name, email: user.email },
-    token,
-  }, 'Login successful');
+  successResponse(
+    res,
+    {
+      user: { id: user._id, name: user.name, email: user.email },
+      token,
+    },
+    'Login successful'
+  );
 });
 
 /**
@@ -69,14 +83,18 @@ export const getMe = asyncHandler(async (req: AuthRequest, res: Response) => {
     throw new NotFoundError('User not found');
   }
 
-  successResponse(res, {
-    id: user._id,
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    avatar: user.avatar,
-    createdAt: user.createdAt,
-  }, 'User profile fetched');
+  successResponse(
+    res,
+    {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      avatar: user.avatar,
+      createdAt: user.createdAt,
+    },
+    'User profile fetched'
+  );
 });
 
 /**
@@ -96,14 +114,18 @@ export const updateProfile = asyncHandler(async (req: AuthRequest, res: Response
     throw new NotFoundError('User not found');
   }
 
-  successResponse(res, {
-    id: user._id,
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    avatar: user.avatar,
-    timezone: user.timezone,
-  }, 'Profile updated successfully');
+  successResponse(
+    res,
+    {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      avatar: user.avatar,
+      timezone: user.timezone,
+    },
+    'Profile updated successfully'
+  );
 });
 
 /**
@@ -220,12 +242,14 @@ export const deleteAccount = asyncHandler(async (req: AuthRequest, res: Response
  */
 export const exportUserData = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
-  
+
   if (!userId) {
     throw new UnauthorizedError('User not authenticated');
   }
 
-  const user = await User.findById(userId).select('-password -resetPasswordToken -resetPasswordExpires');
+  const user = await User.findById(userId).select(
+    '-password -resetPasswordToken -resetPasswordExpires'
+  );
   if (!user) {
     throw new NotFoundError('User not found');
   }
@@ -272,7 +296,7 @@ export const exportUserData = asyncHandler(async (req: AuthRequest, res: Respons
   const filename = `daytracker-export-${user.email}-${new Date().toISOString().split('T')[0]}.json`;
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-  
+
   res.json(exportData);
 });
 
@@ -295,13 +319,17 @@ export const getUsers = asyncHandler(async (req: AuthRequest, res: Response) => 
     User.countDocuments({ isActive: true }),
   ]);
 
-  successResponse(res, {
-    users,
-    pagination: {
-      page: pageNum,
-      limit: limitNum,
-      total,
-      totalPages: Math.ceil(total / limitNum),
+  successResponse(
+    res,
+    {
+      users,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
     },
-  }, 'Users fetched successfully');
+    'Users fetched successfully'
+  );
 });

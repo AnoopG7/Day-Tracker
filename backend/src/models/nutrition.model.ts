@@ -85,4 +85,7 @@ const nutritionEntrySchema = new Schema<INutritionEntry>(
 nutritionEntrySchema.index({ userId: 1, date: -1 }); // Most recent entries
 nutritionEntrySchema.index({ userId: 1, mealType: 1, date: -1 }); // Meal type analytics
 
-export const NutritionEntry = mongoose.model<INutritionEntry>('NutritionEntry', nutritionEntrySchema);
+export const NutritionEntry = mongoose.model<INutritionEntry>(
+  'NutritionEntry',
+  nutritionEntrySchema
+);

@@ -51,12 +51,18 @@ const convertTo24Hour = (time12h: string): string => {
 
 // ===== Save Functions =====
 
-async function saveDaylog(
-  selectedDate: string,
-  sleepData: SleepExerciseData
-): Promise<void> {
-  const { sleepStartTime, sleepEndTime, sleepHours, exerciseStartTime, exerciseEndTime, exerciseDuration, exerciseType, daylogNotes } = sleepData;
-  
+async function saveDaylog(selectedDate: string, sleepData: SleepExerciseData): Promise<void> {
+  const {
+    sleepStartTime,
+    sleepEndTime,
+    sleepHours,
+    exerciseStartTime,
+    exerciseEndTime,
+    exerciseDuration,
+    exerciseType,
+    daylogNotes,
+  } = sleepData;
+
   if (!sleepStartTime && !exerciseStartTime && !exerciseDuration && !exerciseType && !daylogNotes) {
     return;
   }
@@ -127,7 +133,15 @@ async function saveMeals(selectedDate: string, mealRows: MealRow[]): Promise<voi
 }
 
 async function saveExpenses(selectedDate: string, expenseRows: ExpenseRow[]): Promise<void> {
-  const validCategories = ['food', 'transport', 'shopping', 'bills', 'entertainment', 'health', 'other'];
+  const validCategories = [
+    'food',
+    'transport',
+    'shopping',
+    'bills',
+    'entertainment',
+    'health',
+    'other',
+  ];
   const validPayments = ['cash', 'card', 'upi', 'netbanking', 'other'];
 
   for (const expense of expenseRows) {
@@ -137,11 +151,15 @@ async function saveExpenses(selectedDate: string, expenseRows: ExpenseRow[]): Pr
       if (paymentValue === 'net banking') paymentValue = 'netbanking';
 
       if (!validCategories.includes(categoryValue)) {
-        throw new Error(`Invalid category "${expense.category}". Must be one of: Food, Transport, Shopping, Bills, Entertainment, Health, or Other`);
+        throw new Error(
+          `Invalid category "${expense.category}". Must be one of: Food, Transport, Shopping, Bills, Entertainment, Health, or Other`
+        );
       }
 
       if (paymentValue && !validPayments.includes(paymentValue)) {
-        throw new Error(`Invalid payment method "${expense.paymentMethod}". Must be one of: Cash, Card, UPI, Net Banking, or Other`);
+        throw new Error(
+          `Invalid payment method "${expense.paymentMethod}". Must be one of: Cash, Card, UPI, Net Banking, or Other`
+        );
       }
 
       try {
@@ -156,7 +174,11 @@ async function saveExpenses(selectedDate: string, expenseRows: ExpenseRow[]): Pr
         });
       } catch (error: unknown) {
         const err = error as { response?: { data?: unknown }; message?: string };
-        console.error('Failed to save expense:', expense.description, err.response?.data || err.message);
+        console.error(
+          'Failed to save expense:',
+          expense.description,
+          err.response?.data || err.message
+        );
         throw new Error(
           `Failed to save expense: ${expense.description}. ${typeof err.response?.data === 'object' && err.response.data && 'message' in err.response.data ? err.response.data.message : err.message}`
         );
@@ -183,7 +205,11 @@ async function saveCustomActivities(
           await api.delete(`/activities/${existingLog._id}`);
         } catch (error: unknown) {
           const err = error as { response?: { data?: { message?: string } }; message?: string };
-          console.error('Failed to delete activity:', activityName, err.response?.data || err.message);
+          console.error(
+            'Failed to delete activity:',
+            activityName,
+            err.response?.data || err.message
+          );
         }
       }
       continue;
@@ -199,8 +225,14 @@ async function saveCustomActivities(
       });
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } }; message?: string };
-      console.error('Failed to save custom activity:', activityName, err.response?.data || err.message);
-      throw new Error(`Failed to save activity "${activityName}": ${err.response?.data?.message || err.message}`);
+      console.error(
+        'Failed to save custom activity:',
+        activityName,
+        err.response?.data || err.message
+      );
+      throw new Error(
+        `Failed to save activity "${activityName}": ${err.response?.data?.message || err.message}`
+      );
     }
   }
 }
@@ -286,7 +318,16 @@ export function useSaveActivityLog(
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, selectedDate, sleepExerciseData, mealRows, expenseRows, customActivities, data, onSuccess]);
+  }, [
+    submitting,
+    selectedDate,
+    sleepExerciseData,
+    mealRows,
+    expenseRows,
+    customActivities,
+    data,
+    onSuccess,
+  ]);
 
   return { submitting, snackbar, setSnackbar, handleSaveAll };
 }

@@ -35,9 +35,7 @@ const customActivitySchema = new Schema<ICustomActivity>(
         {
           validator: function (value: string) {
             const normalized = value.trim().toLowerCase();
-            return !DEFAULT_ACTIVITIES.includes(
-              normalized as typeof DEFAULT_ACTIVITIES[number]
-            );
+            return !DEFAULT_ACTIVITIES.includes(normalized as (typeof DEFAULT_ACTIVITIES)[number]);
           },
           message: `Activity name cannot be one of the defaults: ${DEFAULT_ACTIVITIES.join(', ')}`,
         },
@@ -95,4 +93,7 @@ customActivitySchema.pre('validate', function () {
 // Unique: one activity name per user per day
 customActivitySchema.index({ userId: 1, date: 1, name: 1 }, { unique: true });
 
-export const CustomActivity = mongoose.model<ICustomActivity>('CustomActivity', customActivitySchema);
+export const CustomActivity = mongoose.model<ICustomActivity>(
+  'CustomActivity',
+  customActivitySchema
+);

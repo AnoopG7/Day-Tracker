@@ -55,11 +55,11 @@ export const MealTable: FC<MealTableProps> = ({ rows, onAddRow, onRemoveRow, onU
   // Handle AI auto-fill for a specific row
   const handleAIAutoFill = async (rowId: string, foodName: string) => {
     if (!foodName.trim() || aiLoading) return;
-    
+
     setLoadingRowId(rowId);
     const result = await estimateMacros(foodName);
     setLoadingRowId(null);
-    
+
     if (result) {
       onUpdateRow(rowId, 'calories', result.calories.toString());
       onUpdateRow(rowId, 'protein', result.protein.toString());
@@ -156,7 +156,11 @@ export const MealTable: FC<MealTableProps> = ({ rows, onAddRow, onRemoveRow, onU
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <Tooltip title={row.foodName ? 'Auto-fill macros with AI' : 'Enter food name first'}>
+                          <Tooltip
+                            title={
+                              row.foodName ? 'Auto-fill macros with AI' : 'Enter food name first'
+                            }
+                          >
                             <span>
                               <IconButton
                                 size="small"
@@ -331,7 +335,13 @@ export const MealTable: FC<MealTableProps> = ({ rows, onAddRow, onRemoveRow, onU
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            <Tooltip title={row.foodName ? 'Auto-fill macros with AI ✨' : 'Enter food name first'}>
+                            <Tooltip
+                              title={
+                                row.foodName
+                                  ? 'Auto-fill macros with AI ✨'
+                                  : 'Enter food name first'
+                              }
+                            >
                               <span>
                                 <IconButton
                                   size="small"

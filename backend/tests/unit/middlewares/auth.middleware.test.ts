@@ -15,7 +15,7 @@ describe('Auth Middleware', () => {
   beforeEach(() => {
     process.env = { ...originalEnv };
     process.env.JWT_SECRET = 'test-secret';
-    process.env.JWT_EXPIRE = '1h';
+    process.env.JWT_EXPIRES_IN = '1h';
 
     jsonMock = jest.fn();
     statusMock = jest.fn().mockReturnValue({ json: jsonMock });

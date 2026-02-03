@@ -68,7 +68,6 @@ const CalendarPage = () => {
           <MonthCalendar currentDate={currentDate} />
         </Paper>
 
-
         {/* Completion Rules */}
         <Paper
           elevation={0}
@@ -85,7 +84,8 @@ const CalendarPage = () => {
             📊 How Days Are Marked Complete
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            A day turns <strong style={{ color: '#4caf50' }}>green (complete)</strong> when you log all three:
+            A day turns <strong style={{ color: '#4caf50' }}>green (complete)</strong> when you log
+            all three:
           </Typography>
           <Box component="ul" sx={{ mt: 1, mb: 0, pl: 3 }}>
             <Typography component="li" variant="body2" color="text.secondary">

@@ -29,24 +29,31 @@ export const getExpenses = asyncHandler(async (req: AuthRequest, res: Response) 
   if (category) filter.category = category;
 
   const [expenses, total] = await Promise.all([
-    ExpenseEntry.find(filter).sort({ date: -1, createdAt: -1 }).skip((pageNum - 1) * limitNum).limit(limitNum),
+    ExpenseEntry.find(filter)
+      .sort({ date: -1, createdAt: -1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum),
     ExpenseEntry.countDocuments(filter),
   ]);
 
   // Calculate total amount for filtered results
   const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
 
-  successResponse(res, {
-    expenses,
-    totalAmount,
-    pagination: {
-      page: pageNum,
-      limit: limitNum,
-      total,
-      totalPages: Math.ceil(total / limitNum),
-      hasMore: pageNum * limitNum < total,
+  successResponse(
+    res,
+    {
+      expenses,
+      totalAmount,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+        hasMore: pageNum * limitNum < total,
+      },
     },
-  }, 'Expenses fetched');
+    'Expenses fetched'
+  );
 });
 
 /**
@@ -67,7 +74,7 @@ export const getExpenseById = asyncHandler(async (req: AuthRequest, res: Respons
  */
 export const createExpense = asyncHandler(async (req: AuthRequest, res: Response) => {
   const expense = await ExpenseEntry.create({
-    ...req.body as CreateExpenseInput,
+    ...(req.body as CreateExpenseInput),
     userId: req.user?.userId,
   });
   successResponse(res, expense, 'Expense created', 201);
@@ -97,14 +104,18 @@ export const updateExpense = asyncHandler(async (req: AuthRequest, res: Response
 export const deleteExpense = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id, date } = req.params;
   const userId = req.user?.userId;
-  
+
   // Bulk delete by date
   if (date) {
     const result = await ExpenseEntry.deleteMany({ userId, date });
-    successResponse(res, { deletedCount: result.deletedCount }, `Deleted ${result.deletedCount} expenses`);
+    successResponse(
+      res,
+      { deletedCount: result.deletedCount },
+      `Deleted ${result.deletedCount} expenses`
+    );
     return;
   }
-  
+
   // Single delete by ID
   const expense = await ExpenseEntry.findOneAndDelete({ _id: id, userId });
   if (!expense) {
@@ -120,7 +131,7 @@ export const deleteExpense = asyncHandler(async (req: AuthRequest, res: Response
 export const getDailySummary = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
   const { date } = req.query;
-  
+
   const targetDate = (date as string) || new Date().toISOString().split('T')[0];
 
   const expenses = await ExpenseEntry.find({ userId, date: targetDate });
@@ -162,7 +173,7 @@ export const getDailySummary = asyncHandler(async (req: AuthRequest, res: Respon
 export const getMonthlySummary = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
   const { month, year } = req.query;
-  
+
   const now = new Date();
   const targetYear = parseInt(year as string) || now.getFullYear();
   const targetMonth = parseInt(month as string) || now.getMonth() + 1;
@@ -199,15 +210,19 @@ export const getMonthlySummary = asyncHandler(async (req: AuthRequest, res: Resp
   const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
   const daysWithExpenses = Object.keys(dailyTotals).length;
 
-  successResponse(res, {
-    period: { year: targetYear, month: targetMonth, startDate, endDate },
-    totalExpenses: expenses.length,
-    totalAmount,
-    averagePerDay: daysWithExpenses > 0 ? Math.round(totalAmount / daysWithExpenses) : 0,
-    daysWithExpenses,
-    byCategory: categoryTotals,
-    dailyBreakdown: dailyTotals,
-  }, 'Monthly expense summary fetched');
+  successResponse(
+    res,
+    {
+      period: { year: targetYear, month: targetMonth, startDate, endDate },
+      totalExpenses: expenses.length,
+      totalAmount,
+      averagePerDay: daysWithExpenses > 0 ? Math.round(totalAmount / daysWithExpenses) : 0,
+      daysWithExpenses,
+      byCategory: categoryTotals,
+      dailyBreakdown: dailyTotals,
+    },
+    'Monthly expense summary fetched'
+  );
 });
 
 /**
@@ -234,7 +249,8 @@ export const getCategoryBreakdown = asyncHandler(async (req: AuthRequest, res: R
 
   const expenses = await ExpenseEntry.find(filter);
 
-  const categoryBreakdown: Record<string, { count: number; amount: number; percentage: number }> = {};
+  const categoryBreakdown: Record<string, { count: number; amount: number; percentage: number }> =
+    {};
   const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   for (const expense of expenses) {
@@ -247,18 +263,23 @@ export const getCategoryBreakdown = asyncHandler(async (req: AuthRequest, res: R
 
   // Calculate percentages
   for (const category of Object.keys(categoryBreakdown)) {
-    categoryBreakdown[category].percentage = totalAmount > 0 
-      ? Math.round((categoryBreakdown[category].amount / totalAmount) * 100 * 10) / 10 
-      : 0;
+    categoryBreakdown[category].percentage =
+      totalAmount > 0
+        ? Math.round((categoryBreakdown[category].amount / totalAmount) * 100 * 10) / 10
+        : 0;
   }
 
-  successResponse(res, {
-    period: {
-      startDate: (startDate as string) || defaultStart,
-      endDate: (endDate as string) || defaultEnd,
+  successResponse(
+    res,
+    {
+      period: {
+        startDate: (startDate as string) || defaultStart,
+        endDate: (endDate as string) || defaultEnd,
+      },
+      totalAmount,
+      totalExpenses: expenses.length,
+      categories: categoryBreakdown,
     },
-    totalAmount,
-    totalExpenses: expenses.length,
-    categories: categoryBreakdown,
-  }, 'Category breakdown fetched');
+    'Category breakdown fetched'
+  );
 });

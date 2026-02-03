@@ -6,11 +6,7 @@ export const registerSchema = z.object({
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name cannot exceed 100 characters')
     .trim(),
-  email: z
-    .string()
-    .email('Please provide a valid email')
-    .toLowerCase()
-    .trim(),
+  email: z.string().email('Please provide a valid email').toLowerCase().trim(),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -23,21 +19,12 @@ export const registerSchema = z.object({
     .string()
     .regex(/^[0-9]{10,15}$/, 'Please provide a valid phone number')
     .optional(),
-  timezone: z
-    .string()
-    .min(1, 'Timezone is required')
-    .default('UTC'),
+  timezone: z.string().min(1, 'Timezone is required').default('UTC'),
 });
 
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .email('Please provide a valid email')
-    .toLowerCase()
-    .trim(),
-  password: z
-    .string()
-    .min(1, 'Password is required'),
+  email: z.string().email('Please provide a valid email').toLowerCase().trim(),
+  password: z.string().min(1, 'Password is required'),
 });
 
 export const updateProfileSchema = z.object({
@@ -51,13 +38,8 @@ export const updateProfileSchema = z.object({
     .string()
     .regex(/^[0-9]{10,15}$/, 'Please provide a valid phone number')
     .optional(),
-  avatar: z
-    .string()
-    .url('Avatar must be a valid URL')
-    .optional(),
-  timezone: z
-    .string()
-    .optional(),
+  avatar: z.string().url('Avatar must be a valid URL').optional(),
+  timezone: z.string().optional(),
 });
 
 export const updatePasswordSchema = z.object({

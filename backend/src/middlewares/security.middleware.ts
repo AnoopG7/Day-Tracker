@@ -13,7 +13,7 @@ const createRateLimiter = (options: {
   const store: RateLimitStore = {};
 
   // Cleanup old entries every minute
-  setInterval(() => {
+  globalThis.setInterval(() => {
     const now = Date.now();
     for (const key in store) {
       if (store[key].resetTime < now) {
@@ -106,18 +106,18 @@ export const passwordResetRateLimiter = createRateLimiter({
 export const securityHeaders = (_req: Request, res: Response, next: NextFunction): void => {
   // X-Content-Type-Options
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  
+
   // X-Frame-Options
   res.setHeader('X-Frame-Options', 'DENY');
-  
+
   // X-XSS-Protection
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  
+
   // Referrer-Policy
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
+
   // Content-Security-Policy
   res.setHeader('Content-Security-Policy', "default-src 'self'");
-  
+
   next();
 };

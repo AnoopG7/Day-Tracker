@@ -43,10 +43,7 @@ export const createdResponse = <T>(
   return successResponse(res, data, message, 201);
 };
 
-export const notFoundResponse = (
-  res: Response,
-  message = 'Resource not found'
-): Response => {
+export const notFoundResponse = (res: Response, message = 'Resource not found'): Response => {
   return errorResponse(res, message, 404);
 };
 
@@ -58,9 +55,6 @@ export const badRequestResponse = (
   return errorResponse(res, message, 400, error);
 };
 
-export const unauthorizedResponse = (
-  res: Response,
-  message = 'Unauthorized'
-): Response => {
+export const unauthorizedResponse = (res: Response, message = 'Unauthorized'): Response => {
   return errorResponse(res, message, 401);
 };

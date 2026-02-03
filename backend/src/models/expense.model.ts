@@ -1,6 +1,14 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export const EXPENSE_CATEGORIES = ['food', 'transport', 'shopping', 'bills', 'entertainment', 'health', 'other'] as const;
+export const EXPENSE_CATEGORIES = [
+  'food',
+  'transport',
+  'shopping',
+  'bills',
+  'entertainment',
+  'health',
+  'other',
+] as const;
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
 
 export const PAYMENT_METHODS = ['cash', 'card', 'upi', 'netbanking', 'other'] as const;
@@ -64,7 +72,7 @@ const expenseEntrySchema = new Schema<IExpenseEntry>(
     merchant: {
       type: String,
       trim: true,
-      lowercase:true,
+      lowercase: true,
       maxlength: [100, 'Merchant name cannot exceed 100 characters'],
     },
     source: {

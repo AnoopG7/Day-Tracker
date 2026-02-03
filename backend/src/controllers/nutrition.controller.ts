@@ -4,7 +4,10 @@ import { successResponse } from '../utils/apiResponse.util.js';
 import { NotFoundError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.util.js';
 import type { AuthRequest } from '../types/index.js';
-import type { CreateNutritionInput, UpdateNutritionInput } from '../validations/nutrition.validation.js';
+import type {
+  CreateNutritionInput,
+  UpdateNutritionInput,
+} from '../validations/nutrition.validation.js';
 
 /**
  * @desc    Get nutrition entries with pagination, date range, and meal type filter
@@ -29,20 +32,27 @@ export const getNutritionEntries = asyncHandler(async (req: AuthRequest, res: Re
   if (mealType) filter.mealType = mealType;
 
   const [entries, total] = await Promise.all([
-    NutritionEntry.find(filter).sort({ date: -1, createdAt: -1 }).skip((pageNum - 1) * limitNum).limit(limitNum),
+    NutritionEntry.find(filter)
+      .sort({ date: -1, createdAt: -1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum),
     NutritionEntry.countDocuments(filter),
   ]);
 
-  successResponse(res, {
-    entries,
-    pagination: {
-      page: pageNum,
-      limit: limitNum,
-      total,
-      totalPages: Math.ceil(total / limitNum),
-      hasMore: pageNum * limitNum < total,
+  successResponse(
+    res,
+    {
+      entries,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+        hasMore: pageNum * limitNum < total,
+      },
     },
-  }, 'Nutrition entries fetched');
+    'Nutrition entries fetched'
+  );
 });
 
 /**
@@ -63,7 +73,7 @@ export const getNutritionById = asyncHandler(async (req: AuthRequest, res: Respo
  */
 export const createNutrition = asyncHandler(async (req: AuthRequest, res: Response) => {
   const entry = await NutritionEntry.create({
-    ...req.body as CreateNutritionInput,
+    ...(req.body as CreateNutritionInput),
     userId: req.user?.userId,
   });
   successResponse(res, entry, 'Nutrition entry created', 201);
@@ -93,14 +103,18 @@ export const updateNutrition = asyncHandler(async (req: AuthRequest, res: Respon
 export const deleteNutrition = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id, date } = req.params;
   const userId = req.user?.userId;
-  
+
   // Bulk delete by date
   if (date) {
     const result = await NutritionEntry.deleteMany({ userId, date });
-    successResponse(res, { deletedCount: result.deletedCount }, `Deleted ${result.deletedCount} nutrition entries`);
+    successResponse(
+      res,
+      { deletedCount: result.deletedCount },
+      `Deleted ${result.deletedCount} nutrition entries`
+    );
     return;
   }
-  
+
   // Single delete by ID
   const entry = await NutritionEntry.findOneAndDelete({ _id: id, userId });
   if (!entry) {
@@ -116,7 +130,7 @@ export const deleteNutrition = asyncHandler(async (req: AuthRequest, res: Respon
 export const getDailySummary = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
   const { date } = req.query;
-  
+
   const targetDate = (date as string) || new Date().toISOString().split('T')[0];
 
   const entries = await NutritionEntry.find({ userId, date: targetDate });
@@ -155,11 +169,11 @@ export const getDailySummary = asyncHandler(async (req: AuthRequest, res: Respon
  */
 export const getWeeklySummary = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
-  
+
   const today = new Date();
   const weekAgo = new Date(today);
   weekAgo.setDate(weekAgo.getDate() - 7);
-  
+
   const startDate = weekAgo.toISOString().split('T')[0];
   const endDate = today.toISOString().split('T')[0];
 
@@ -169,7 +183,10 @@ export const getWeeklySummary = asyncHandler(async (req: AuthRequest, res: Respo
   });
 
   // Aggregate by date
-  const dailyTotals: Record<string, { calories: number; protein: number; carbs: number; fats: number; entries: number }> = {};
+  const dailyTotals: Record<
+    string,
+    { calories: number; protein: number; carbs: number; fats: number; entries: number }
+  > = {};
 
   for (const entry of entries) {
     if (!dailyTotals[entry.date]) {
@@ -186,20 +203,24 @@ export const getWeeklySummary = asyncHandler(async (req: AuthRequest, res: Respo
   const totalCalories = Object.values(dailyTotals).reduce((sum, d) => sum + d.calories, 0);
   const totalProtein = Object.values(dailyTotals).reduce((sum, d) => sum + d.protein, 0);
 
-  successResponse(res, {
-    period: { startDate, endDate },
-    totalEntries: entries.length,
-    daysWithData,
-    totals: {
-      calories: totalCalories,
-      protein: totalProtein,
-      carbs: Object.values(dailyTotals).reduce((sum, d) => sum + d.carbs, 0),
-      fats: Object.values(dailyTotals).reduce((sum, d) => sum + d.fats, 0),
+  successResponse(
+    res,
+    {
+      period: { startDate, endDate },
+      totalEntries: entries.length,
+      daysWithData,
+      totals: {
+        calories: totalCalories,
+        protein: totalProtein,
+        carbs: Object.values(dailyTotals).reduce((sum, d) => sum + d.carbs, 0),
+        fats: Object.values(dailyTotals).reduce((sum, d) => sum + d.fats, 0),
+      },
+      averages: {
+        caloriesPerDay: daysWithData > 0 ? Math.round(totalCalories / daysWithData) : 0,
+        proteinPerDay: daysWithData > 0 ? Math.round(totalProtein / daysWithData) : 0,
+      },
+      dailyBreakdown: dailyTotals,
     },
-    averages: {
-      caloriesPerDay: daysWithData > 0 ? Math.round(totalCalories / daysWithData) : 0,
-      proteinPerDay: daysWithData > 0 ? Math.round(totalProtein / daysWithData) : 0,
-    },
-    dailyBreakdown: dailyTotals,
-  }, 'Weekly nutrition summary fetched');
+    'Weekly nutrition summary fetched'
+  );
 });

@@ -1,5 +1,11 @@
 import { Response } from 'express';
-import { DayLog, CustomActivity, ActivityTemplate, NutritionEntry, ExpenseEntry } from '../models/index.js';
+import {
+  DayLog,
+  CustomActivity,
+  ActivityTemplate,
+  NutritionEntry,
+  ExpenseEntry,
+} from '../models/index.js';
 import { successResponse } from '../utils/apiResponse.util.js';
 import { asyncHandler } from '../utils/asyncHandler.util.js';
 import type { AuthRequest } from '../types/index.js';
@@ -8,7 +14,7 @@ import type { AuthRequest } from '../types/index.js';
  * @desc    Get dashboard data for a specific date
  * @route   GET /api/dashboard
  * @query   date - YYYY-MM-DD (defaults to today)
- * 
+ *
  * Returns aggregated data for a single day:
  * - DayLog (sleep, exercise, notes)
  * - Custom activities
@@ -18,7 +24,7 @@ import type { AuthRequest } from '../types/index.js';
 export const getDashboard = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
   const { date } = req.query;
-  
+
   // Default to today if no date provided
   const targetDate = (date as string) || new Date().toISOString().split('T')[0];
 
@@ -70,7 +76,6 @@ export const getDashboard = asyncHandler(async (req: AuthRequest, res: Response)
     expenseTotals.byCategory[entry.category].amount += entry.amount;
   }
 
-
   // Calculate activity totals
   let totalActivityMinutes = 0;
   for (const activity of activities) {
@@ -78,8 +83,8 @@ export const getDashboard = asyncHandler(async (req: AuthRequest, res: Response)
       totalActivityMinutes += activity.duration;
     } else if (activity.startTime && activity.endTime) {
       const [startH, startM] = activity.startTime.split(':').map(Number);
-      const [endH,endM] = activity.endTime.split(':').map(Number);
-      const duration = (endH * 60 + endM) - (startH * 60 + startM);
+      const [endH, endM] = activity.endTime.split(':').map(Number);
+      const duration = endH * 60 + endM - (startH * 60 + startM);
       totalActivityMinutes += Math.max(0, duration);
     }
   }
@@ -88,29 +93,33 @@ export const getDashboard = asyncHandler(async (req: AuthRequest, res: Response)
   const customActivityTemplates = await ActivityTemplate.find({ userId, isActive: true })
     .select('name')
     .lean();
-  const templateNames = customActivityTemplates.map(t => t.name);
+  const templateNames = customActivityTemplates.map((t) => t.name);
 
-  successResponse(res, {
-    date: targetDate,
-    daylog: daylog || null,
-    activities: {
-      items: activities,
-      count: activities.length,
-      totalMinutes: totalActivityMinutes,
+  successResponse(
+    res,
+    {
+      date: targetDate,
+      daylog: daylog || null,
+      activities: {
+        items: activities,
+        count: activities.length,
+        totalMinutes: totalActivityMinutes,
+      },
+      nutrition: {
+        entries: nutritionEntries,
+        count: nutritionEntries.length,
+        totals: nutritionTotals,
+      },
+      expenses: {
+        entries: expenseEntries,
+        count: expenseEntries.length,
+        totals: expenseTotals,
+      },
+      customActivities: {
+        templates: templateNames, // Array of active template names from ActivityTemplate
+        todayLogs: activities, // Today's custom activity instances
+      },
     },
-    nutrition: {
-      entries: nutritionEntries,
-      count: nutritionEntries.length,
-      totals: nutritionTotals,
-    },
-    expenses: {
-      entries: expenseEntries,
-      count: expenseEntries.length,
-      totals: expenseTotals,
-    },
-    customActivities: {
-      templates: templateNames, // Array of active template names from ActivityTemplate
-      todayLogs: activities, // Today's custom activity instances
-    },
-  }, 'Dashboard data fetched');
+    'Dashboard data fetched'
+  );
 });

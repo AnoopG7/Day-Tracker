@@ -7,7 +7,7 @@ describe('JWT Utility', () => {
   beforeEach(() => {
     process.env = { ...originalEnv };
     process.env.JWT_SECRET = 'test-secret-key';
-    process.env.JWT_EXPIRE = '1h';
+    process.env.JWT_EXPIRES_IN = '1h';
   });
 
   afterEach(() => {

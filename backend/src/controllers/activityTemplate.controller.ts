@@ -4,7 +4,10 @@ import { successResponse } from '../utils/apiResponse.util.js';
 import { NotFoundError, ConflictError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.util.js';
 import type { AuthRequest } from '../types/index.js';
-import type { CreateTemplateInput, UpdateTemplateInput } from '../validations/activityTemplate.validation.js';
+import type {
+  CreateTemplateInput,
+  UpdateTemplateInput,
+} from '../validations/activityTemplate.validation.js';
 
 /**
  * @desc    Get all active templates for the user
@@ -15,7 +18,7 @@ export const getTemplates = asyncHandler(async (req: AuthRequest, res: Response)
   const { includeInactive } = req.query;
 
   const filter: Record<string, unknown> = { userId };
-  
+
   // By default, only show active templates
   if (includeInactive !== 'true') {
     filter.isActive = true;
@@ -77,12 +80,7 @@ export const createTemplate = asyncHandler(async (req: AuthRequest, res: Respons
       existingTemplate.isActive = true;
       await existingTemplate.save();
 
-      return successResponse(
-        res,
-        existingTemplate,
-        'Template reactivated successfully',
-        200
-      );
+      return successResponse(res, existingTemplate, 'Template reactivated successfully', 200);
     }
   }
 

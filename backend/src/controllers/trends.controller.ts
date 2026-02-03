@@ -44,8 +44,8 @@ export const getWeeklyTrends = asyncHandler(async (req: AuthRequest, res: Respon
   ]);
 
   // Filter custom activities to only include those with active templates
-  const activeTemplateNames = new Set(activeTemplates.map(t => t.name.toLowerCase()));
-  const filteredCustomActivities = customActivities.filter(activity => 
+  const activeTemplateNames = new Set(activeTemplates.map((t) => t.name.toLowerCase()));
+  const filteredCustomActivities = customActivities.filter((activity) =>
     activeTemplateNames.has(activity.name.toLowerCase())
   );
 
@@ -212,8 +212,8 @@ export const getMonthlyTrends = asyncHandler(async (req: AuthRequest, res: Respo
   ]);
 
   // Filter custom activities to only include those with active templates
-  const activeTemplateNames = new Set(activeTemplates.map(t => t.name.toLowerCase()));
-  const filteredCustomActivities = customActivities.filter(activity => 
+  const activeTemplateNames = new Set(activeTemplates.map((t) => t.name.toLowerCase()));
+  const filteredCustomActivities = customActivities.filter((activity) =>
     activeTemplateNames.has(activity.name.toLowerCase())
   );
 
@@ -525,8 +525,8 @@ export const getYearlyTrends = asyncHandler(async (req: AuthRequest, res: Respon
   ]);
 
   // Filter custom activities to only include those with active templates
-  const activeTemplateNames = new Set(activeTemplates.map(t => t.name.toLowerCase()));
-  const filteredCustomActivities = customActivities.filter(activity => 
+  const activeTemplateNames = new Set(activeTemplates.map((t) => t.name.toLowerCase()));
+  const filteredCustomActivities = customActivities.filter((activity) =>
     activeTemplateNames.has(activity.name.toLowerCase())
   );
 

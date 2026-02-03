@@ -1,7 +1,15 @@
 import { z } from 'zod';
 import { DEFAULT_ACTIVITIES } from '../models/daylog.model.js';
 
-const ACTIVITY_CATEGORIES = ['health', 'learning', 'hobbies', 'work', 'social', 'selfcare', 'other'] as const;
+const ACTIVITY_CATEGORIES = [
+  'health',
+  'learning',
+  'hobbies',
+  'work',
+  'social',
+  'selfcare',
+  'other',
+] as const;
 
 /**
  * Schema for creating activity template
@@ -13,10 +21,9 @@ export const createTemplateSchema = z.object({
     .max(50, 'Activity name cannot exceed 50 characters')
     .trim()
     .toLowerCase()
-    .refine(
-      (val) => !DEFAULT_ACTIVITIES.includes(val as typeof DEFAULT_ACTIVITIES[number]),
-      { message: `Activity name cannot be one of the reserved activities: ${DEFAULT_ACTIVITIES.join(', ')}` }
-    ),
+    .refine((val) => !DEFAULT_ACTIVITIES.includes(val as (typeof DEFAULT_ACTIVITIES)[number]), {
+      message: `Activity name cannot be one of the reserved activities: ${DEFAULT_ACTIVITIES.join(', ')}`,
+    }),
   category: z.enum(ACTIVITY_CATEGORIES, {
     message: `Category must be one of: ${ACTIVITY_CATEGORIES.join(', ')}`,
   }),
@@ -38,14 +45,15 @@ export const updateTemplateSchema = z.object({
     .max(50, 'Activity name cannot exceed 50 characters')
     .trim()
     .toLowerCase()
-    .refine(
-      (val) => !DEFAULT_ACTIVITIES.includes(val as typeof DEFAULT_ACTIVITIES[number]),
-      { message: `Activity name cannot be one of the reserved activities: ${DEFAULT_ACTIVITIES.join(', ')}` }
-    )
+    .refine((val) => !DEFAULT_ACTIVITIES.includes(val as (typeof DEFAULT_ACTIVITIES)[number]), {
+      message: `Activity name cannot be one of the reserved activities: ${DEFAULT_ACTIVITIES.join(', ')}`,
+    })
     .optional(),
-  category: z.enum(ACTIVITY_CATEGORIES, {
-    message: `Category must be one of: ${ACTIVITY_CATEGORIES.join(', ')}`,
-  }).optional(),
+  category: z
+    .enum(ACTIVITY_CATEGORIES, {
+      message: `Category must be one of: ${ACTIVITY_CATEGORIES.join(', ')}`,
+    })
+    .optional(),
   icon: z.string().max(10, 'Icon cannot exceed 10 characters').optional(),
   defaultDuration: z
     .number()

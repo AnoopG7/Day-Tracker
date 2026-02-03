@@ -15,7 +15,13 @@ interface ErrorResponse {
  * Enhanced Global Error Handler
  */
 export const errorHandler = (
-  err: Error & { code?: number; keyValue?: Record<string, unknown>; path?: string; value?: unknown; errors?: Record<string, { message: string }> },
+  err: Error & {
+    code?: number;
+    keyValue?: Record<string, unknown>;
+    path?: string;
+    value?: unknown;
+    errors?: Record<string, { message: string }>;
+  },
   _req: Request,
   res: Response,
   _next: NextFunction

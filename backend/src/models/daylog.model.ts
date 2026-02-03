@@ -10,7 +10,7 @@ export const EXERCISE_TYPES = [
   'yoga',
   'sports',
   'cardio',
-  'other'
+  'other',
 ] as const;
 
 // Activity can be tracked with EITHER times OR duration, not both

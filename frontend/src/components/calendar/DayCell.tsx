@@ -44,20 +44,22 @@ const DayCell = ({
         };
       default: // empty or future
         return {
-          bg: theme.palette.mode === 'dark' 
-            ? alpha(theme.palette.text.disabled, 0.2)
-            : theme.palette.action.disabledBackground,
+          bg:
+            theme.palette.mode === 'dark'
+              ? alpha(theme.palette.text.disabled, 0.2)
+              : theme.palette.action.disabledBackground,
           text: theme.palette.text.secondary,
           border: theme.palette.divider,
         };
     }
   };
 
-  const colors = isFuture 
+  const colors = isFuture
     ? {
-        bg: theme.palette.mode === 'dark'
-          ? alpha(theme.palette.background.paper, 0.3)
-          : theme.palette.grey[100],
+        bg:
+          theme.palette.mode === 'dark'
+            ? alpha(theme.palette.background.paper, 0.3)
+            : theme.palette.grey[100],
         text: theme.palette.text.disabled,
         border: theme.palette.divider,
       }
@@ -90,8 +92,8 @@ const DayCell = ({
           borderRadius: { xs: 1, sm: 1.5 },
           backgroundColor: colors.bg,
           color: colors.text,
-          border: isToday 
-            ? `3px solid ${theme.palette.primary.main}` 
+          border: isToday
+            ? `3px solid ${theme.palette.primary.main}`
             : `1px solid ${colors.border}`,
           cursor: isFuture ? 'default' : 'pointer',
           fontWeight: isToday ? 700 : isCurrentMonth ? 600 : 400,

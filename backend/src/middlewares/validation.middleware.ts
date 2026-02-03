@@ -4,10 +4,7 @@ import { badRequestResponse } from '../utils/apiResponse.util.js';
 
 type ValidationTarget = 'body' | 'params' | 'query';
 
-export const validate = (
-  schema: ZodSchema,
-target: ValidationTarget = 'body'
-) => {
+export const validate = (schema: ZodSchema, target: ValidationTarget = 'body') => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const data = req[target];
@@ -15,7 +12,7 @@ target: ValidationTarget = 'body'
 
       // Replace the target with parsed data (for transformed values)
       req[target] = parsed;
-      
+
       next();
     } catch (error) {
       if (error instanceof ZodError) {
@@ -23,7 +20,7 @@ target: ValidationTarget = 'body'
           field: e.path.join('.'),
           message: e.message,
         }));
-        
+
         res.status(400).json({
           success: false,
           message: 'Validation failed',
@@ -31,7 +28,7 @@ target: ValidationTarget = 'body'
         });
         return;
       }
-      
+
       badRequestResponse(res, 'Validation error');
     }
   };

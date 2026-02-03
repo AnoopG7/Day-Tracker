@@ -32,16 +32,20 @@ export const getDayLogs = asyncHandler(async (req: AuthRequest, res: Response) =
     DayLog.countDocuments(filter),
   ]);
 
-  successResponse(res, {
-    daylogs,
-    pagination: {
-      page: pageNum,
-      limit: limitNum,
-      total,
-      totalPages: Math.ceil(total / limitNum),
-      hasMore: pageNum * limitNum < total,
+  successResponse(
+    res,
+    {
+      daylogs,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+        hasMore: pageNum * limitNum < total,
+      },
     },
-  }, 'DayLogs fetched successfully');
+    'DayLogs fetched successfully'
+  );
 });
 
 /**
@@ -50,20 +54,20 @@ export const getDayLogs = asyncHandler(async (req: AuthRequest, res: Response) =
  */
 export const getTodayDayLog = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
-  
+
   // Get user's timezone
   const user = await User.findById(userId).select('timezone');
   const timezone = user?.timezone || 'UTC';
   const today = getTodayInTimezone(timezone);
 
   let daylog = await DayLog.findOne({ userId, date: today });
-  
+
   // Auto-create if doesn't exist
   if (!daylog) {
     daylog = await DayLog.create({ userId, date: today });
   }
 
-  successResponse(res, daylog, 'Today\'s DayLog fetched');
+  successResponse(res, daylog, "Today's DayLog fetched");
 });
 
 /**
@@ -144,12 +148,12 @@ export const deleteDayLog = asyncHandler(async (req: AuthRequest, res: Response)
  */
 export const getWeeklySummary = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
-  
+
   // Get last 7 days
   const today = new Date();
   const weekAgo = new Date(today);
   weekAgo.setDate(weekAgo.getDate() - 7);
-  
+
   const startDate = weekAgo.toISOString().split('T')[0];
   const endDate = today.toISOString().split('T')[0];
 
@@ -172,7 +176,7 @@ export const getWeeklySummary = asyncHandler(async (req: AuthRequest, res: Respo
       } else if (log.sleep.startTime && log.sleep.endTime) {
         const [startH, startM] = log.sleep.startTime.split(':').map(Number);
         const [endH, endM] = log.sleep.endTime.split(':').map(Number);
-        let duration = (endH * 60 + endM) - (startH * 60 + startM);
+        let duration = endH * 60 + endM - (startH * 60 + startM);
         if (duration < 0) duration += 24 * 60; // Overnight sleep
         totalSleepMinutes += duration;
         sleepEntryCount++;
@@ -185,79 +189,95 @@ export const getWeeklySummary = asyncHandler(async (req: AuthRequest, res: Respo
       } else if (log.exercise.startTime && log.exercise.endTime) {
         const [startH, startM] = log.exercise.startTime.split(':').map(Number);
         const [endH, endM] = log.exercise.endTime.split(':').map(Number);
-        const duration = (endH * 60 + endM) - (startH * 60 + startM);
+        const duration = endH * 60 + endM - (startH * 60 + startM);
         totalExerciseMinutes += Math.max(0, duration);
         exerciseEntryCount++;
       }
     }
   }
 
-  successResponse(res, {
-    period: { startDate, endDate },
-    daysLogged: daylogs.length,
-    sleep: {
-      totalMinutes: totalSleepMinutes,
-      avgMinutesPerDay: sleepEntryCount > 0 ? Math.round(totalSleepMinutes / sleepEntryCount) : 0,
-      avgHoursPerDay: sleepEntryCount > 0 ? Math.round((totalSleepMinutes / sleepEntryCount / 60) * 10) / 10 : 0,
-      daysTracked: sleepEntryCount,
+  successResponse(
+    res,
+    {
+      period: { startDate, endDate },
+      daysLogged: daylogs.length,
+      sleep: {
+        totalMinutes: totalSleepMinutes,
+        avgMinutesPerDay: sleepEntryCount > 0 ? Math.round(totalSleepMinutes / sleepEntryCount) : 0,
+        avgHoursPerDay:
+          sleepEntryCount > 0
+            ? Math.round((totalSleepMinutes / sleepEntryCount / 60) * 10) / 10
+            : 0,
+        daysTracked: sleepEntryCount,
+      },
+      exercise: {
+        totalMinutes: totalExerciseMinutes,
+        avgMinutesPerDay:
+          exerciseEntryCount > 0 ? Math.round(totalExerciseMinutes / exerciseEntryCount) : 0,
+        daysTracked: exerciseEntryCount,
+      },
     },
-    exercise: {
-      totalMinutes: totalExerciseMinutes,
-      avgMinutesPerDay: exerciseEntryCount > 0 ? Math.round(totalExerciseMinutes / exerciseEntryCount) : 0,
-      daysTracked: exerciseEntryCount,
-    },
-  }, 'Weekly summary fetched');
+    'Weekly summary fetched'
+  );
 });
 
 /**
  * @desc    Get current streak (consecutive days with sleep OR exercise logged)
  * @route   GET /api/daylogs/streak
- * 
+ *
  * Streak Rule: A day counts if it has:
  * - sleep data (duration OR start/end times), OR
  * - exercise data (duration OR start/end times)
  */
 export const getStreak = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
-  
+
   // Get user's timezone
   const user = await User.findById(userId).select('timezone');
   const timezone = user?.timezone || 'UTC';
-  
+
   // Get last 365 days of logs with sleep/exercise data
   const yearAgoDate = getDateInTimezone(timezone, -365);
 
   const daylogs = await DayLog.find({
     userId,
     date: { $gte: yearAgoDate },
-  }).select('date sleep exercise').sort({ date: -1 });
+  })
+    .select('date sleep exercise')
+    .sort({ date: -1 });
 
   // Helper to check if activity data exists
-  const hasActivityData = (activity: { duration?: number; startTime?: string; endTime?: string } | undefined): boolean => {
+  const hasActivityData = (
+    activity: { duration?: number; startTime?: string; endTime?: string } | undefined
+  ): boolean => {
     if (!activity) return false;
     return !!(activity.duration || (activity.startTime && activity.endTime));
   };
 
   // Filter to only days with actual data logged
-  const completedDays = daylogs.filter(d => 
-    hasActivityData(d.sleep) || hasActivityData(d.exercise)
+  const completedDays = daylogs.filter(
+    (d) => hasActivityData(d.sleep) || hasActivityData(d.exercise)
   );
 
   if (completedDays.length === 0) {
-    successResponse(res, { 
-      currentStreak: 0, 
-      longestStreak: 0, 
-      totalDaysLogged: 0,
-      streakRule: 'Day counts if sleep OR exercise is logged',
-    }, 'Streak info fetched');
+    successResponse(
+      res,
+      {
+        currentStreak: 0,
+        longestStreak: 0,
+        totalDaysLogged: 0,
+        streakRule: 'Day counts if sleep OR exercise is logged',
+      },
+      'Streak info fetched'
+    );
     return;
   }
 
-  const loggedDates = new Set(completedDays.map(d => d.date));
+  const loggedDates = new Set(completedDays.map((d) => d.date));
   let currentStreak = 0;
   let longestStreak = 0;
   let tempStreak = 0;
-  
+
   // Check from today backwards (using user's timezone)
   const todayStr = getTodayInTimezone(timezone);
   const checkDate = new Date(todayStr + 'T00:00:00');
@@ -268,7 +288,7 @@ export const getStreak = asyncHandler(async (req: AuthRequest, res: Response) =>
     const month = String(checkDate.getMonth() + 1).padStart(2, '0');
     const day = String(checkDate.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
-    
+
     if (loggedDates.has(dateStr)) {
       tempStreak++;
       if (isCurrentStreak) currentStreak = tempStreak;
@@ -277,16 +297,20 @@ export const getStreak = asyncHandler(async (req: AuthRequest, res: Response) =>
       tempStreak = 0;
       isCurrentStreak = false;
     }
-    
+
     checkDate.setDate(checkDate.getDate() - 1);
   }
-  
+
   longestStreak = Math.max(longestStreak, tempStreak);
 
-  successResponse(res, {
-    currentStreak,
-    longestStreak,
-    totalDaysLogged: completedDays.length,
-    streakRule: 'Day counts if sleep OR exercise is logged',
-  }, 'Streak info fetched');
+  successResponse(
+    res,
+    {
+      currentStreak,
+      longestStreak,
+      totalDaysLogged: completedDays.length,
+      streakRule: 'Day counts if sleep OR exercise is logged',
+    },
+    'Streak info fetched'
+  );
 });
