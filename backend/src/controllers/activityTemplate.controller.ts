@@ -107,7 +107,7 @@ export const updateTemplate = asyncHandler(async (req: AuthRequest, res: Respons
     const existingTemplate = await ActivityTemplate.findOne({
       userId,
       name: templateData.name.toLowerCase(),
-      _id: { $ne: req.params.id } as { $ne: mongoose.Types.ObjectId }, // Exclude current template
+      _id: { $ne: req.params.id } as unknown as { $ne: mongoose.Types.ObjectId }, // Exclude current template
     });
 
     if (existingTemplate) {
