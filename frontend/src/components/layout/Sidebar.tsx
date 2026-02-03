@@ -14,7 +14,6 @@ import {
 import HomeIcon from '@mui/icons-material/Home';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -36,7 +35,6 @@ const mainNavItems: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: <HomeIcon /> },
   { label: 'Activities', path: '/activities', icon: <FitnessCenterIcon /> },
   { label: 'Calendar', path: '/calendar', icon: <CalendarMonthIcon /> },
-  { label: 'Tasks', path: '/tasks', icon: <CheckCircleIcon /> },
   { label: 'Analytics', path: '/analytics', icon: <BarChartIcon /> },
 ];
 

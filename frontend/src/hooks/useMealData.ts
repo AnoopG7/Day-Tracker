@@ -79,7 +79,7 @@ export function useMealData(data: DashboardData | null, selectedDate: string): U
   };
 
   const updateMealRow = (id: string, field: keyof MealRow, value: string) => {
-    setMealRows(mealRows.map((row) => (row.id === id ? { ...row, [field]: value } : row)));
+    setMealRows((prev) => prev.map((row) => (row.id === id ? { ...row, [field]: value } : row)));
   };
 
   return {

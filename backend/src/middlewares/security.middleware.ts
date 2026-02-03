@@ -52,11 +52,15 @@ const createRateLimiter = (options: {
 };
 
 /**
- * Global rate limiter - 100 requests per 15 minutes
+ * Global rate limiter
+ * - Production: 200 requests per 15 minutes (stricter for security)
+ * - Development: 10000 requests per minute (effectively unlimited)
  */
+const isProduction = process.env.NODE_ENV === 'production';
+
 export const globalRateLimiter = createRateLimiter({
-  windowMs: 15 * 60 * 1000,
-  limit: 100,
+  windowMs: isProduction ? 15 * 60 * 1000 : 1 * 60 * 1000, // 15 min (prod) / 1 min (dev)
+  limit: isProduction ? 200 : 10000, // 200 (prod) / 10000 (dev)
   message: {
     success: false,
     error: {

@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import { type FC, useState } from 'react';
 import {
   Box,
   Typography,
@@ -17,8 +17,12 @@ import {
   Stack,
   useMediaQuery,
   useTheme,
+  Tooltip,
+  CircularProgress,
+  InputAdornment,
 } from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon, Delete as DeleteIcon, AutoAwesome as AIIcon } from '@mui/icons-material';
+import { useNutritionAI } from '@hooks/useNutritionAI';
 
 export interface MealRow {
   id: string;
@@ -45,6 +49,25 @@ interface MealTableProps {
 export const MealTable: FC<MealTableProps> = ({ rows, onAddRow, onRemoveRow, onUpdateRow }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { estimateMacros, isLoading: aiLoading } = useNutritionAI();
+  const [loadingRowId, setLoadingRowId] = useState<string | null>(null);
+
+  // Handle AI auto-fill for a specific row
+  const handleAIAutoFill = async (rowId: string, foodName: string) => {
+    if (!foodName.trim() || aiLoading) return;
+    
+    setLoadingRowId(rowId);
+    const result = await estimateMacros(foodName);
+    setLoadingRowId(null);
+    
+    if (result) {
+      onUpdateRow(rowId, 'calories', result.calories.toString());
+      onUpdateRow(rowId, 'protein', result.protein.toString());
+      onUpdateRow(rowId, 'carbs', result.carbs.toString());
+      onUpdateRow(rowId, 'fats', result.fats.toString());
+      onUpdateRow(rowId, 'fiber', result.fiber.toString());
+    }
+  };
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -130,6 +153,29 @@ export const MealTable: FC<MealTableProps> = ({ rows, onAddRow, onRemoveRow, onU
                     label="Food Name"
                     value={row.foodName}
                     onChange={(e) => onUpdateRow(row.id, 'foodName', e.target.value)}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title={row.foodName ? 'Auto-fill macros with AI' : 'Enter food name first'}>
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleAIAutoFill(row.id, row.foodName)}
+                                disabled={!row.foodName.trim() || loadingRowId === row.id}
+                                color="primary"
+                                sx={{ p: 0.5 }}
+                              >
+                                {loadingRowId === row.id ? (
+                                  <CircularProgress size={16} />
+                                ) : (
+                                  <AIIcon fontSize="small" />
+                                )}
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </Grid>
                 <Grid size={6}>
@@ -282,6 +328,29 @@ export const MealTable: FC<MealTableProps> = ({ rows, onAddRow, onRemoveRow, onU
                       value={row.foodName}
                       onChange={(e) => onUpdateRow(row.id, 'foodName', e.target.value)}
                       placeholder="Food name"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Tooltip title={row.foodName ? 'Auto-fill macros with AI ✨' : 'Enter food name first'}>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleAIAutoFill(row.id, row.foodName)}
+                                  disabled={!row.foodName.trim() || loadingRowId === row.id}
+                                  color="primary"
+                                  sx={{ p: 0.5 }}
+                                >
+                                  {loadingRowId === row.id ? (
+                                    <CircularProgress size={16} />
+                                  ) : (
+                                    <AIIcon fontSize="small" />
+                                  )}
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
                   </TableCell>
                   <TableCell>

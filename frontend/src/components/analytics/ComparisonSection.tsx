@@ -57,7 +57,7 @@ export const ComparisonSection: FC<ComparisonSectionProps> = ({ title, subtitle,
         {comparisons.map((comparison, index) => {
           const changeInfo = getChangeInfo(comparison.current, comparison.previous);
           return (
-            <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
+            <Grid key={index} size={{ xs: 6, sm: 6, lg: 3 }}>
               <Paper
                 elevation={0}
                 sx={{
