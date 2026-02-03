@@ -1,4 +1,4 @@
-import { type FC, useState, useEffect } from 'react';
+import { type FC, useState, useEffect, useMemo } from 'react';
 import { Box, Typography, Button, Paper, Divider, TextField, Snackbar, Alert } from '@mui/material';
 
 // Helper to capitalize first letter
@@ -6,7 +6,7 @@ const capitalize = (str: string): string => {
   if (!str) return str;
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
-import api from '@services/api';
+
 import type { DashboardData } from '@/types/dashboard.types';
 import { SleepExerciseForm } from './SleepExerciseForm';
 import { MealsSection } from './MealsSection';
@@ -14,6 +14,7 @@ import { ExpenseTable } from './ExpenseTable';
 import { CustomActivityForm } from './CustomActivityForm';
 import { useMealData } from '@hooks/useMealData';
 import { useExpenseData } from '@hooks/useExpenseData';
+import { useSaveActivityLog } from '@hooks/useSaveActivityLog';
 
 interface TodayActivityLogProps {
   selectedDate: string;
@@ -23,19 +24,9 @@ interface TodayActivityLogProps {
 
 /**
  * Today's Activity Log - Modular Excel-like interface for daily tracking
+ * Refactored to use useSaveActivityLog hook for save logic
  */
 export const TodayActivityLog: FC<TodayActivityLogProps> = ({ selectedDate, data, onSuccess }) => {
-  const [submitting, setSubmitting] = useState(false);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error';
-  }>({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
-
   // Sleep & Exercise state
   const [sleepHours, setSleepHours] = useState('');
   const [sleepStartTime, setSleepStartTime] = useState('');
@@ -54,6 +45,29 @@ export const TodayActivityLog: FC<TodayActivityLogProps> = ({ selectedDate, data
   const [customActivities, setCustomActivities] = useState<
     Record<string, { duration: string; notes: string }>
   >({});
+
+  // Bundle sleep/exercise data for the save hook
+  const sleepExerciseData = useMemo(() => ({
+    sleepHours,
+    sleepStartTime,
+    sleepEndTime,
+    exerciseDuration,
+    exerciseType,
+    exerciseStartTime,
+    exerciseEndTime,
+    daylogNotes,
+  }), [sleepHours, sleepStartTime, sleepEndTime, exerciseDuration, exerciseType, exerciseStartTime, exerciseEndTime, daylogNotes]);
+
+  // Use the save hook for all save logic
+  const { submitting, snackbar, setSnackbar, handleSaveAll } = useSaveActivityLog(
+    selectedDate,
+    sleepExerciseData,
+    mealData.mealRows,
+    expenseData.expenseRows,
+    customActivities,
+    data,
+    onSuccess
+  );
 
   // Initialize custom activities when data loads
   useEffect(() => {
@@ -111,231 +125,6 @@ export const TodayActivityLog: FC<TodayActivityLogProps> = ({ selectedDate, data
         [field]: value,
       },
     }));
-  };
-
-  // Save all data
-  const handleSaveAll = async (): Promise<void> => {
-    if (submitting) return;
-
-    setSubmitting(true);
-    try {
-      // Bulk delete existing entries for this date (2 API calls instead of many)
-      await Promise.all([
-        api.delete(`/nutrition/date/${selectedDate}`),
-        api.delete(`/expenses/date/${selectedDate}`),
-      ]);
-
-      // Helper to convert 12-hour time to 24-hour format
-      const convertTo24Hour = (time12h: string): string => {
-        if (!time12h) return '';
-        const [time, modifier] = time12h.split(' ');
-        let [hours] = time.split(':');
-        const minutes = time.split(':')[1];
-        if (hours === '12') {
-          hours = '00';
-        }
-        if (modifier === 'PM') {
-          hours = String(parseInt(hours, 10) + 12);
-        }
-        return `${hours.padStart(2, '0')}:${minutes}`;
-      };
-
-      // Save sleep & exercise
-      if (sleepStartTime || exerciseStartTime || daylogNotes) {
-        const daylogPayload: {
-          date: string;
-          sleep?: { startTime?: string; endTime?: string; duration?: number };
-          exercise?: {
-            startTime?: string;
-            endTime?: string;
-            duration?: number;
-            exerciseType?: string;
-          };
-          notes?: string;
-        } = { date: selectedDate };
-
-        if (sleepStartTime && sleepEndTime) {
-          daylogPayload.sleep = {
-            startTime: convertTo24Hour(sleepStartTime),
-            endTime: convertTo24Hour(sleepEndTime),
-            ...(sleepHours && { duration: Math.round(Number(sleepHours) * 60) }),
-          };
-        }
-        if (exerciseStartTime && exerciseEndTime) {
-          daylogPayload.exercise = {
-            startTime: convertTo24Hour(exerciseStartTime),
-            endTime: convertTo24Hour(exerciseEndTime),
-            ...(exerciseDuration && { duration: Number(exerciseDuration) }),
-            ...(exerciseType && { exerciseType: exerciseType.toLowerCase() }),
-          };
-        }
-        if (daylogNotes) {
-          daylogPayload.notes = daylogNotes;
-        }
-
-        await api.post('/daylogs', daylogPayload);
-      }
-
-      // Save all meals
-      for (const meal of mealData.mealRows) {
-        if (meal.foodName && meal.calories && meal.mealType) {
-          // Map display values to backend enum values
-          let mealTypeValue = meal.mealType.toLowerCase();
-          if (mealTypeValue === 'snacks') mealTypeValue = 'snack';
-
-          try {
-            await api.post('/nutrition', {
-              date: selectedDate,
-              mealType: mealTypeValue,
-              foodName: meal.foodName.toLowerCase(),
-              calories: Number(meal.calories),
-              ...(meal.protein && { protein: Number(meal.protein) }),
-              ...(meal.carbs && { carbs: Number(meal.carbs) }),
-              ...(meal.fats && { fats: Number(meal.fats) }),
-              ...(meal.fiber && { fiber: Number(meal.fiber) }),
-              ...(meal.notes && { notes: meal.notes }),
-            });
-          } catch (error: unknown) {
-            const err = error as { response?: { data?: unknown }; message?: string };
-            console.error('Failed to save meal:', meal.foodName, err.response?.data || err.message);
-            throw new Error(
-              `Failed to save meal: ${meal.foodName}. ${typeof err.response?.data === 'object' && err.response.data && 'message' in err.response.data ? err.response.data.message : err.message}`
-            );
-          }
-        }
-      }
-
-      // Save expenses
-      const validCategories = [
-        'food',
-        'transport',
-        'shopping',
-        'bills',
-        'entertainment',
-        'health',
-        'other',
-      ];
-      const validPayments = ['cash', 'card', 'upi', 'netbanking', 'other'];
-
-      for (const expense of expenseData.expenseRows) {
-        if (expense.amount && expense.description && expense.category) {
-          // Map display values to backend enum values
-          const categoryValue = expense.category.toLowerCase();
-          let paymentValue = expense.paymentMethod
-            ? expense.paymentMethod.toLowerCase()
-            : undefined;
-
-          // Handle multi-word payment methods
-          if (paymentValue === 'net banking') paymentValue = 'netbanking';
-
-          // Validate category
-          if (!validCategories.includes(categoryValue)) {
-            throw new Error(
-              `Invalid category "${expense.category}". Must be one of: Food, Transport, Shopping, Bills, Entertainment, Health, or Other`
-            );
-          }
-
-          // Validate payment method if provided
-          if (paymentValue && !validPayments.includes(paymentValue)) {
-            throw new Error(
-              `Invalid payment method "${expense.paymentMethod}". Must be one of: Cash, Card, UPI, Net Banking, or Other`
-            );
-          }
-
-          try {
-            await api.post('/expenses', {
-              date: selectedDate,
-              amount: Number(expense.amount),
-              category: categoryValue,
-              description: expense.description,
-              ...(paymentValue && { paymentMethod: paymentValue }),
-              ...(expense.merchant && { merchant: expense.merchant.toLowerCase() }),
-              ...(expense.notes && { notes: expense.notes }),
-            });
-          } catch (error: unknown) {
-            const err = error as { response?: { data?: unknown }; message?: string };
-            console.error(
-              'Failed to save expense:',
-              expense.description,
-              err.response?.data || err.message
-            );
-            throw new Error(
-              `Failed to save expense: ${expense.description}. ${typeof err.response?.data === 'object' && err.response.data && 'message' in err.response.data ? err.response.data.message : err.message}`
-            );
-          }
-        }
-      }
-
-      // Save custom activities
-      if (data?.customActivities?.templates) {
-        for (const activityName of data.customActivities.templates) {
-          const activityData = customActivities[activityName];
-          const existingLog = data.customActivities.todayLogs.find(
-            (log) => log.name === activityName
-          );
-
-          // If no duration or duration is 0, delete the activity if it exists
-          if (
-            !activityData?.duration ||
-            activityData.duration === '0' ||
-            activityData.duration === ''
-          ) {
-            if (existingLog?._id) {
-              try {
-                await api.delete(`/activities/${existingLog._id}`);
-              } catch (error: unknown) {
-                const err = error as {
-                  response?: { data?: { message?: string } };
-                  message?: string;
-                };
-                console.error(
-                  'Failed to delete activity:',
-                  activityName,
-                  err.response?.data || err.message
-                );
-                // Continue even if delete fails (activity might not exist)
-              }
-            }
-            continue; // Skip to next activity
-          }
-
-          // Upsert activity (create or update)
-          try {
-            await api.put('/activities/upsert', {
-              date: selectedDate,
-              name: activityName,
-              duration: Number(activityData.duration),
-              ...(activityData.notes && { notes: activityData.notes }),
-            });
-          } catch (error: unknown) {
-            const err = error as { response?: { data?: { message?: string } }; message?: string };
-            console.error(
-              'Failed to save custom activity:',
-              activityName,
-              err.response?.data || err.message
-            );
-            throw new Error(
-              `Failed to save activity "${activityName}": ${err.response?.data?.message || err.message}`
-            );
-          }
-        }
-      }
-
-      // Refetch data for the selected date
-      await onSuccess?.(selectedDate);
-
-      setSnackbar({ open: true, message: 'Changes saved successfully! ✓', severity: 'success' });
-    } catch (err) {
-      console.error('Failed to save activities:', err);
-      const error = err as { message?: string };
-      setSnackbar({
-        open: true,
-        message: error.message || 'Failed to save changes. Please try again.',
-        severity: 'error',
-      });
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   // Check if there are any changes

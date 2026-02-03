@@ -1,4 +1,4 @@
-import { type ReactElement, useMemo, useState } from 'react';
+import { type ReactElement, useMemo } from 'react';
 import {
   Box,
   Container,
@@ -11,6 +11,7 @@ import {
   Stack,
 } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { useLocation } from 'react-router-dom';
 import { MainLayout } from '@components/layout';
 import { StatCard, ErrorBoundary } from '@components/common';
 import { TodayActivityLog } from '@components/dashboard';
@@ -26,6 +27,8 @@ import { useStreak } from '@hooks/useStreak';
 
 /** Dashboard page with statistics and overview */
 export default function DashboardPage(): ReactElement {
+  const location = useLocation();
+
   // Get today's date in YYYY-MM-DD format (local timezone)
   const today = useMemo(() => {
     const now = new Date();
@@ -34,7 +37,19 @@ export default function DashboardPage(): ReactElement {
     const day = String(now.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }, []);
-  const [selectedDate, setSelectedDate] = useState<string>(today);
+
+  // Derive selected date from URL - no state sync needed
+  const selectedDate = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('date') || today;
+  }, [location.search, today]);
+
+  // Setter function that updates URL (which triggers selectedDate recalculation)
+  const setSelectedDate = (newDate: string) => {
+    window.history.pushState({}, '', `/dashboard?date=${newDate}`);
+    // Force re-render by triggering navigation
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
 
   const { data, isLoading, error, refetch } = useDashboard(selectedDate);
   const { data: streakData, isLoading: streakLoading } = useStreak();
@@ -47,7 +62,8 @@ export default function DashboardPage(): ReactElement {
   const handlePreviousDay = () => {
     const date = new Date(selectedDate);
     date.setDate(date.getDate() - 1);
-    setSelectedDate(date.toISOString().split('T')[0]);
+    const newDate = date.toISOString().split('T')[0];
+    setSelectedDate(newDate);
   };
 
   const handleNextDay = () => {

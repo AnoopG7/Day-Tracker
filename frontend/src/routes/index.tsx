@@ -8,6 +8,8 @@ const LandingPage = lazy(() => import('@pages/LandingPage'));
 const DashboardPage = lazy(() => import('@pages/DashboardPage'));
 const AnalyticsPage = lazy(() => import('@pages/AnalyticsPage'));
 const ActivitiesPage = lazy(() => import('@pages/ActivitiesPage'));
+const CalendarPage = lazy(() => import('@pages/CalendarPage'));
+const SettingsPage = lazy(() => import('@pages/SettingsPage'));
 const HomePage = lazy(() => import('@pages/HomePage'));
 const AboutPage = lazy(() => import('@pages/AboutPage'));
 const ComponentShowcase = lazy(() => import('@pages/ComponentShowcase'));
@@ -82,6 +84,22 @@ export default function AppRoutes(): ReactElement {
           element={
             <ProtectedRoute>
               <ActivitiesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/calendar"
+          element={
+            <ProtectedRoute>
+              <CalendarPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

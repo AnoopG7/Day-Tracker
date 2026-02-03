@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAppContext } from '@context/AppContext';
 import api from '@services/api';
 
 export interface DailyTrendData {
@@ -47,7 +46,6 @@ export interface UseWeeklyTrendsReturn {
  * Custom hook for fetching weekly trend data (last 7 days)
  */
 export function useWeeklyTrends(): UseWeeklyTrendsReturn {
-  const { showNotification } = useAppContext();
   const [data, setData] = useState<WeeklyTrendsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,25 +56,20 @@ export function useWeeklyTrends(): UseWeeklyTrendsReturn {
       setError(null);
       const response = await api.get('/trends/weekly');
       setData(response.data.data);
-    } catch {
+    } catch (err) {
       const errorMessage = 'Failed to load weekly trends';
       setError(errorMessage);
+      console.error('Weekly trends fetch error:', err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Initial fetch
+  // Fetch only once on mount
   useEffect(() => {
     fetchWeeklyTrends();
-  }, [fetchWeeklyTrends]);
-
-  // Separate effect for error notifications
-  useEffect(() => {
-    if (error) {
-      showNotification(error, 'error');
-    }
-  }, [error, showNotification]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty array - only run once
 
   return {
     data,

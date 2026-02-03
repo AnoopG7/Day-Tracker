@@ -90,9 +90,10 @@ export const createOrUpdateDayLog = asyncHandler(async (req: AuthRequest, res: R
   const userId = req.user?.userId;
   const { date, ...data } = req.body as CreateDayLogInput;
 
+  // Use $set to merge fields instead of replacing the entire document
   const daylog = await DayLog.findOneAndUpdate(
     { userId, date },
-    { userId, date, ...data },
+    { $set: { userId, date, ...data } },
     { upsert: true, new: true, runValidators: true }
   );
 

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAppContext } from '@context/AppContext';
 import daylogService, { type StreakData } from '@services/daylog.service';
 
 export interface UseStreakReturn {
@@ -14,7 +13,6 @@ export interface UseStreakReturn {
  * Tracks current and longest streak based on daily activity
  */
 export function useStreak(): UseStreakReturn {
-  const { showNotification } = useAppContext();
   const [data, setData] = useState<StreakData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,25 +23,19 @@ export function useStreak(): UseStreakReturn {
       setError(null);
       const streakData = await daylogService.getStreak();
       setData(streakData);
-    } catch {
+    } catch (err) {
       const errorMessage = 'Failed to load streak data';
       setError(errorMessage);
+      console.error('Streak fetch error:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Initial fetch
+  // Fetch only once on mount
   useEffect(() => {
     fetchStreak();
-  }, []);
-
-  // Separate effect for error notifications
-  useEffect(() => {
-    if (error) {
-      showNotification(error, 'error');
-    }
-  }, [error, showNotification]);
+  }, []); // Empty dependency array - only run once
 
   return {
     data,

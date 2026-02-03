@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAppContext } from '@context/AppContext';
 import dashboardService from '@services/dashboard.service';
 import type { DashboardData } from '@/types/dashboard.types';
 
@@ -15,7 +14,6 @@ export interface UseDashboardReturn {
  * @param initialDate - Optional date in YYYY-MM-DD format
  */
 export function useDashboard(initialDate?: string): UseDashboardReturn {
-  const { showNotification } = useAppContext();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,9 +25,10 @@ export function useDashboard(initialDate?: string): UseDashboardReturn {
         setError(null);
         const dashboardData = await dashboardService.getDashboard(date);
         setData(dashboardData);
-      } catch {
+      } catch (err) {
         const errorMessage = 'Failed to load dashboard data';
         setError(errorMessage);
+        console.error('Dashboard fetch error:', err);
       } finally {
         setIsLoading(false);
       }
@@ -37,17 +36,11 @@ export function useDashboard(initialDate?: string): UseDashboardReturn {
     [] // No dependencies - function is stable
   );
 
-  // Initial fetch
+  // Fetch only when initialDate changes
   useEffect(() => {
     fetchDashboard(initialDate);
-  }, [initialDate, fetchDashboard]);
-
-  // Separate effect for error notifications
-  useEffect(() => {
-    if (error) {
-      showNotification(error, 'error');
-    }
-  }, [error, showNotification]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialDate]); // Only refetch when date changes
 
   return {
     data,
