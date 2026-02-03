@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
 import { ActivityTemplate } from '../models/index.js';
 import { successResponse } from '../utils/apiResponse.util.js';
 import { NotFoundError, ConflictError } from '../utils/errors.js';
@@ -106,7 +107,7 @@ export const updateTemplate = asyncHandler(async (req: AuthRequest, res: Respons
     const existingTemplate = await ActivityTemplate.findOne({
       userId,
       name: templateData.name.toLowerCase(),
-      _id: { $ne: req.params.id }, // Exclude current template
+      _id: { $ne: req.params.id } as { $ne: mongoose.Types.ObjectId }, // Exclude current template
     });
 
     if (existingTemplate) {
