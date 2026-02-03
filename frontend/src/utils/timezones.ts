@@ -1,0 +1,57 @@
+/** Timezone data with labels and offsets */
+export interface TimezoneOption {
+  value: string;
+  label: string;
+  offset: string;
+}
+
+export const timezones: TimezoneOption[] = [
+  { value: 'UTC', label: 'UTC (Coordinated Universal Time)', offset: 'UTC+0' },
+  { value: 'America/New_York', label: 'United States - Eastern Time (New York)', offset: 'UTC-5' },
+  { value: 'America/Chicago', label: 'United States - Central Time (Chicago)', offset: 'UTC-6' },
+  { value: 'America/Denver', label: 'United States - Mountain Time (Denver)', offset: 'UTC-7' },
+  {
+    value: 'America/Los_Angeles',
+    label: 'United States - Pacific Time (Los Angeles)',
+    offset: 'UTC-8',
+  },
+  { value: 'America/Anchorage', label: 'United States - Alaska (Anchorage)', offset: 'UTC-9' },
+  { value: 'Pacific/Honolulu', label: 'United States - Hawaii (Honolulu)', offset: 'UTC-10' },
+  { value: 'Europe/London', label: 'United Kingdom - London', offset: 'UTC+0' },
+  { value: 'Europe/Paris', label: 'France - Paris', offset: 'UTC+1' },
+  { value: 'Europe/Berlin', label: 'Germany - Berlin', offset: 'UTC+1' },
+  { value: 'Europe/Rome', label: 'Italy - Rome', offset: 'UTC+1' },
+  { value: 'Europe/Athens', label: 'Greece - Athens', offset: 'UTC+2' },
+  { value: 'Europe/Helsinki', label: 'Finland - Helsinki', offset: 'UTC+2' },
+  { value: 'Europe/Istanbul', label: 'Turkey - Istanbul', offset: 'UTC+3' },
+  { value: 'Europe/Moscow', label: 'Russia - Moscow', offset: 'UTC+3' },
+  { value: 'Asia/Dubai', label: 'United Arab Emirates - Dubai', offset: 'UTC+4' },
+  { value: 'Asia/Karachi', label: 'Pakistan - Karachi', offset: 'UTC+5' },
+  { value: 'Asia/Kolkata', label: 'India - Kolkata, Mumbai, Delhi', offset: 'UTC+5:30' },
+  { value: 'Asia/Dhaka', label: 'Bangladesh - Dhaka', offset: 'UTC+6' },
+  { value: 'Asia/Bangkok', label: 'Thailand - Bangkok', offset: 'UTC+7' },
+  { value: 'Asia/Jakarta', label: 'Indonesia - Jakarta', offset: 'UTC+7' },
+  { value: 'Asia/Hong_Kong', label: 'Hong Kong', offset: 'UTC+8' },
+  { value: 'Asia/Singapore', label: 'Singapore', offset: 'UTC+8' },
+  { value: 'Asia/Shanghai', label: 'China - Shanghai, Beijing', offset: 'UTC+8' },
+  { value: 'Asia/Tokyo', label: 'Japan - Tokyo', offset: 'UTC+9' },
+  { value: 'Asia/Seoul', label: 'South Korea - Seoul', offset: 'UTC+9' },
+  { value: 'Australia/Sydney', label: 'Australia - Sydney', offset: 'UTC+10' },
+  { value: 'Australia/Melbourne', label: 'Australia - Melbourne', offset: 'UTC+10' },
+  { value: 'Australia/Perth', label: 'Australia - Perth', offset: 'UTC+8' },
+  { value: 'Pacific/Auckland', label: 'New Zealand - Auckland', offset: 'UTC+12' },
+  { value: 'America/Toronto', label: 'Canada - Toronto', offset: 'UTC-5' },
+  { value: 'America/Mexico_City', label: 'Mexico - Mexico City', offset: 'UTC-6' },
+  { value: 'America/Sao_Paulo', label: 'Brazil - São Paulo', offset: 'UTC-3' },
+  { value: 'America/Argentina/Buenos_Aires', label: 'Argentina - Buenos Aires', offset: 'UTC-3' },
+  { value: 'Africa/Cairo', label: 'Egypt - Cairo', offset: 'UTC+2' },
+  { value: 'Africa/Johannesburg', label: 'South Africa - Johannesburg', offset: 'UTC+2' },
+  { value: 'Europe/Amsterdam', label: 'Netherlands - Amsterdam', offset: 'UTC+1' },
+  { value: 'Europe/Brussels', label: 'Belgium - Brussels', offset: 'UTC+1' },
+  { value: 'Europe/Copenhagen', label: 'Denmark - Copenhagen', offset: 'UTC+1' },
+  { value: 'Europe/Zurich', label: 'Switzerland - Zurich', offset: 'UTC+1' },
+  { value: 'Europe/Vienna', label: 'Austria - Vienna', offset: 'UTC+1' },
+  { value: 'Europe/Prague', label: 'Czech Republic - Prague', offset: 'UTC+1' },
+  { value: 'Asia/Jerusalem', label: 'Israel - Jerusalem', offset: 'UTC+2' },
+  { value: 'Asia/Riyadh', label: 'Saudi Arabia - Riyadh', offset: 'UTC+3' },
+];

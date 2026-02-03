@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAppContext } from '@context/AppContext';
 import api from '@services/api';
 import type { DailyTrendData, CustomActivityData } from './useWeeklyTrends';
 
@@ -42,7 +41,6 @@ export interface UseMonthlyTrendsReturn {
  * Custom hook for fetching monthly trend data (last 30 days)
  */
 export function useMonthlyTrends(): UseMonthlyTrendsReturn {
-  const { showNotification } = useAppContext();
   const [data, setData] = useState<MonthlyTrendsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,25 +51,20 @@ export function useMonthlyTrends(): UseMonthlyTrendsReturn {
       setError(null);
       const response = await api.get('/trends/monthly');
       setData(response.data.data);
-    } catch {
+    } catch (err) {
       const errorMessage = 'Failed to load monthly trends';
       setError(errorMessage);
+      console.error('Monthly trends fetch error:', err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Initial fetch
+  // Fetch only once on mount
   useEffect(() => {
     fetchMonthlyTrends();
-  }, [fetchMonthlyTrends]);
-
-  // Separate effect for error notifications
-  useEffect(() => {
-    if (error) {
-      showNotification(error, 'error');
-    }
-  }, [error, showNotification]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty array - only run once
 
   return {
     data,

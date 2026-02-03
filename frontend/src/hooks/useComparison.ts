@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAppContext } from '@context/AppContext';
 import api from '@services/api';
 
 export interface ComparisonData {
@@ -46,7 +45,6 @@ export interface UseComparisonReturn {
  * Custom hook for fetching comparison data (today vs yesterday)
  */
 export function useComparison(): UseComparisonReturn {
-  const { showNotification } = useAppContext();
   const [data, setData] = useState<ComparisonData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,25 +55,20 @@ export function useComparison(): UseComparisonReturn {
       setError(null);
       const response = await api.get('/trends/comparison');
       setData(response.data.data);
-    } catch {
+    } catch (err) {
       const errorMessage = 'Failed to load comparison data';
       setError(errorMessage);
+      console.error('Comparison fetch error:', err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Initial fetch
+  // Fetch only once on mount
   useEffect(() => {
     fetchComparison();
-  }, [fetchComparison]);
-
-  // Separate effect for error notifications
-  useEffect(() => {
-    if (error) {
-      showNotification(error, 'error');
-    }
-  }, [error, showNotification]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty array - only run once
 
   return {
     data,

@@ -84,11 +84,11 @@ export const getMe = asyncHandler(async (req: AuthRequest, res: Response) => {
  * @route   PUT /api/auth/profile
  */
 export const updateProfile = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { name, phone, avatar } = req.body;
+  const { name, phone, avatar, timezone } = req.body;
 
   const user = await User.findByIdAndUpdate(
     req.user?.userId,
-    { $set: { name, phone, avatar } },
+    { $set: { name, phone, avatar, timezone } },
     { new: true, runValidators: true }
   );
 
@@ -102,6 +102,7 @@ export const updateProfile = asyncHandler(async (req: AuthRequest, res: Response
     email: user.email,
     phone: user.phone,
     avatar: user.avatar,
+    timezone: user.timezone,
   }, 'Profile updated successfully');
 });
 
@@ -211,6 +212,68 @@ export const deleteAccount = asyncHandler(async (req: AuthRequest, res: Response
   await user.save();
 
   successResponse(res, null, 'Account deleted successfully');
+});
+
+/**
+ * @desc    Export user data
+ * @route   GET /api/auth/export-data
+ */
+export const exportUserData = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.userId;
+  
+  if (!userId) {
+    throw new UnauthorizedError('User not authenticated');
+  }
+
+  const user = await User.findById(userId).select('-password -resetPasswordToken -resetPasswordExpires');
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+
+  // Import models dynamically to avoid circular dependencies
+  const { DayLog } = await import('../models/daylog.model.js');
+  const { NutritionEntry } = await import('../models/nutrition.model.js');
+  const { ExpenseEntry } = await import('../models/expense.model.js');
+  const { CustomActivity } = await import('../models/customactivity.model.js');
+
+  // Fetch all user data
+  const [daylogs, nutrition, expenses, customActivities] = await Promise.all([
+    DayLog.find({ user: userId }).lean(),
+    NutritionEntry.find({ userId }).lean(),
+    ExpenseEntry.find({ userId }).lean(),
+    CustomActivity.find({ user: userId }).lean(),
+  ]);
+
+  const exportData = {
+    exportedAt: new Date().toISOString(),
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      timezone: user.timezone,
+      createdAt: user.createdAt,
+    },
+    statistics: {
+      totalDayLogs: daylogs.length,
+      totalNutritionEntries: nutrition.length,
+      totalExpenses: expenses.length,
+      totalCustomActivities: customActivities.length,
+    },
+    data: {
+      daylogs,
+      nutrition,
+      expenses,
+      customActivities,
+    },
+  };
+
+  // Set headers for file download
+  const filename = `daytracker-export-${user.email}-${new Date().toISOString().split('T')[0]}.json`;
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  
+  res.json(exportData);
 });
 
 /**

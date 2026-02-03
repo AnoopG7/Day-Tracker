@@ -17,7 +17,6 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
-import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useState } from 'react';
@@ -50,11 +49,6 @@ export function Header({ onMenuClick, title = 'Day Tracker' }: HeaderProps): Rea
   const handleLogout = (): void => {
     handleMenuClose();
     logout();
-  };
-
-  const handleProfile = (): void => {
-    handleMenuClose();
-    navigate('/profile');
   };
 
   const handleSettings = (): void => {
@@ -124,12 +118,6 @@ export function Header({ onMenuClick, title = 'Day Tracker' }: HeaderProps): Rea
                 </Typography>
               </Box>
               <Divider sx={{ my: 1 }} />
-              <MenuItem onClick={handleProfile}>
-                <ListItemIcon>
-                  <PersonIcon fontSize="small" />
-                </ListItemIcon>
-                Profile
-              </MenuItem>
               <MenuItem onClick={handleSettings}>
                 <ListItemIcon>
                   <SettingsIcon fontSize="small" />

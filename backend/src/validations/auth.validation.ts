@@ -55,6 +55,9 @@ export const updateProfileSchema = z.object({
     .string()
     .url('Avatar must be a valid URL')
     .optional(),
+  timezone: z
+    .string()
+    .optional(),
 });
 
 export const updatePasswordSchema = z.object({

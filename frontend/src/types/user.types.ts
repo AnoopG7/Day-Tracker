@@ -5,6 +5,7 @@ export interface User {
   name: string;
   phone?: string;
   avatar?: string;
+  timezone?: string;
   createdAt?: string;
   updatedAt?: string;
 }

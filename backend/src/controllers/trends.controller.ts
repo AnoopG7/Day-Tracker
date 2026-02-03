@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { DayLog, NutritionEntry, ExpenseEntry, CustomActivity } from '../models/index.js';
+import { ActivityTemplate } from '../models/activityTemplate.model.js';
 import { User } from '../models/user.model.js';
 import { successResponse } from '../utils/apiResponse.util.js';
 import { asyncHandler } from '../utils/asyncHandler.util.js';
@@ -22,7 +23,7 @@ export const getWeeklyTrends = asyncHandler(async (req: AuthRequest, res: Respon
   const sevenDaysAgo = getDateInTimezone(timezone, -6);
 
   // Fetch all data for the week
-  const [daylogs, nutrition, expenses, customActivities] = await Promise.all([
+  const [daylogs, nutrition, expenses, customActivities, activeTemplates] = await Promise.all([
     DayLog.find({
       userId,
       date: { $gte: sevenDaysAgo, $lte: today },
@@ -39,7 +40,14 @@ export const getWeeklyTrends = asyncHandler(async (req: AuthRequest, res: Respon
       userId,
       date: { $gte: sevenDaysAgo, $lte: today },
     }).sort({ date: 1 }),
+    ActivityTemplate.find({ userId, isActive: true }).select('name'),
   ]);
+
+  // Filter custom activities to only include those with active templates
+  const activeTemplateNames = new Set(activeTemplates.map(t => t.name.toLowerCase()));
+  const filteredCustomActivities = customActivities.filter(activity => 
+    activeTemplateNames.has(activity.name.toLowerCase())
+  );
 
   // Group data by date
   const dailyData: Record<
@@ -97,7 +105,7 @@ export const getWeeklyTrends = asyncHandler(async (req: AuthRequest, res: Respon
     { totalMinutes: number; count: number; dailyMinutes: Record<string, number> }
   > = {};
 
-  customActivities.forEach((activity) => {
+  filteredCustomActivities.forEach((activity) => {
     const activityName = activity.name.toLowerCase();
     if (!customActivitiesData[activityName]) {
       customActivitiesData[activityName] = { totalMinutes: 0, count: 0, dailyMinutes: {} };
@@ -183,7 +191,7 @@ export const getMonthlyTrends = asyncHandler(async (req: AuthRequest, res: Respo
   const thirtyDaysAgo = getDateInTimezone(timezone, -29);
 
   // Fetch all data for the month
-  const [daylogs, nutrition, expenses, customActivities] = await Promise.all([
+  const [daylogs, nutrition, expenses, customActivities, activeTemplates] = await Promise.all([
     DayLog.find({
       userId,
       date: { $gte: thirtyDaysAgo, $lte: today },
@@ -200,7 +208,14 @@ export const getMonthlyTrends = asyncHandler(async (req: AuthRequest, res: Respo
       userId,
       date: { $gte: thirtyDaysAgo, $lte: today },
     }).sort({ date: 1 }),
+    ActivityTemplate.find({ userId, isActive: true }).select('name'),
   ]);
+
+  // Filter custom activities to only include those with active templates
+  const activeTemplateNames = new Set(activeTemplates.map(t => t.name.toLowerCase()));
+  const filteredCustomActivities = customActivities.filter(activity => 
+    activeTemplateNames.has(activity.name.toLowerCase())
+  );
 
   // Group data by date (similar to weekly)
   const dailyData: Record<
@@ -309,7 +324,7 @@ export const getMonthlyTrends = asyncHandler(async (req: AuthRequest, res: Respo
     { totalMinutes: number; count: number; dailyMinutes: Record<string, number> }
   > = {};
 
-  customActivities.forEach((activity) => {
+  filteredCustomActivities.forEach((activity) => {
     const activityName = activity.name.toLowerCase();
     if (!customActivitiesData[activityName]) {
       customActivitiesData[activityName] = { totalMinutes: 0, count: 0, dailyMinutes: {} };
@@ -489,7 +504,7 @@ export const getYearlyTrends = asyncHandler(async (req: AuthRequest, res: Respon
   const oneYearAgo = getDateInTimezone(timezone, -365);
 
   // Fetch all data for the year
-  const [daylogs, nutrition, expenses, customActivities] = await Promise.all([
+  const [daylogs, nutrition, expenses, customActivities, activeTemplates] = await Promise.all([
     DayLog.find({
       userId,
       date: { $gte: oneYearAgo, $lte: today },
@@ -506,7 +521,14 @@ export const getYearlyTrends = asyncHandler(async (req: AuthRequest, res: Respon
       userId,
       date: { $gte: oneYearAgo, $lte: today },
     }).sort({ date: 1 }),
+    ActivityTemplate.find({ userId, isActive: true }).select('name'),
   ]);
+
+  // Filter custom activities to only include those with active templates
+  const activeTemplateNames = new Set(activeTemplates.map(t => t.name.toLowerCase()));
+  const filteredCustomActivities = customActivities.filter(activity => 
+    activeTemplateNames.has(activity.name.toLowerCase())
+  );
 
   // Group data by month
   const monthlyData: Record<
@@ -597,7 +619,7 @@ export const getYearlyTrends = asyncHandler(async (req: AuthRequest, res: Respon
   // Process custom activities data - group by activity name
   const customActivitiesByName: Record<string, { monthlyMinutes: Record<string, number[]> }> = {};
 
-  customActivities.forEach((activity) => {
+  filteredCustomActivities.forEach((activity) => {
     const activityName = activity.name.toLowerCase();
     const activityDate = new Date(activity.date);
     const monthKey = `${activityDate.getFullYear()}-${String(activityDate.getMonth() + 1).padStart(2, '0')}`;

@@ -8,6 +8,7 @@ import {
   forgotPassword,
   resetPassword,
   deleteAccount,
+  exportUserData,
   getUsers,
 } from '../controllers/auth.controller.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
@@ -35,6 +36,7 @@ router.post('/reset-password', passwordResetRateLimiter, validate(resetPasswordS
 router.get('/me', authenticate, getMe);
 router.put('/profile', authenticate, validate(updateProfileSchema), updateProfile);
 router.put('/update-password', authenticate, validate(updatePasswordSchema), updatePassword);
+router.get('/export-data', authenticate, exportUserData);
 router.delete('/account', authenticate, validate(deleteAccountSchema), deleteAccount);
 router.get('/users', authenticate, getUsers);
 
